@@ -1,0 +1,32 @@
+Links For Referencing:
+
+CHATBOTS:=======================================================================
+-Chatbots in Language learning:
+https://research-publishing.net/manuscript?10.14705/rpnet.2022.61.1446
+
+SL to SPEECH:===================================================================
+https://ieeexplore.ieee.org/abstract/document/8875455
+https://ieeexplore.ieee.org/abstract/document/7754472
+
+SL to TEXT:=====================================================================
+https://ijisae.org/index.php/IJISAE/article/view/4662#:~:text=An%20innovative%20approach%20for%20converting,K.K.K.%20D
+https://github.com/sign/translate
+
+SPEECH to SL:===================================================================
+https://aclanthology.org/2023.at4ssl-1.3.pdf
+https://doi.org/10.1016/j.specom.2008.02.001
+
+TEXT to GLOSS:==================================================================
+https://github.com/DFKI-SignLanguage/text-to-gloss-sign-language-translation/blob/main/README.md
+
+GLOSSING:=======================================================================
+https://www.lifeprint.com/asl101/topics/gloss.htm#:~:text=Glossing%20Instructions,SURPRISE)%207%20O'CLOCK
+
+TEXT to SL:=====================================================================
+https://ieeexplore.ieee.org/abstract/document/7078516
+https://cdn.techscience.cn/ueditor/files/cmc/TSP_CMC_70-2/TSP_CMC_19420/TSP_CMC_19420.pdf
+https://link.springer.com/article/10.1007/s10209-021-00823-1
+https://wecapable.com/tools/text-to-sign-language-converter/
+
+SL and TEXT TRANSLATOR with AI:=================================================
+https://github.com/sign-language-translator/sign-language-translator/blob/main/README.md
