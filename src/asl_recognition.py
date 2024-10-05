@@ -1,24 +1,33 @@
+#imported libraries
+
 import cv2
 import mediapipe as mp
-import pyttsx3
+#import pyttsx3
 
 # Initialize MediaPipe Hands and drawing utilities
 mp_hands = mp.solutions.hands
 hands = mp_hands.Hands()
 mp_drawing = mp.solutions.drawing_utils
-engine = pyttsx3.init()
+#engine = pyttsx3.init()
 
 def recognize_gesture(hand_landmarks):
     thumb_tip = hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_TIP]
+    thumb_ip = hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_IP]
     index_tip = hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_TIP]
-    
-    if thumb_tip.y < index_tip.y:
+
+    # Check if the thumb is pointing upwards
+    is_thumb_up = thumb_tip.y < thumb_ip.y and thumb_tip.y < index_tip.y
+
+    thumb_angle = abs(thumb_ip.x - thumb_tip.x)
+    index_angle = abs(index_tip.x - thumb_ip.x)
+
+    if is_thumb_up and thumb_angle < 0.1 and index_angle < 0.1:
         return "Thumbs-up"
     return "Unknown gesture"
 
-def speak_text(text):
-    engine.say(text)
-    engine.runAndWait()
+#def speak_text(text):
+#    engine.say(text)
+#    engine.runAndWait()
 
 # Start capturing video from the webcam
 vidcap = cv2.VideoCapture(0)
@@ -48,8 +57,8 @@ with mp_hands.Hands(
                 mp_drawing.draw_landmarks(frame, hand_landmarks, mp_hands.HAND_CONNECTIONS)
                 gesture = recognize_gesture(hand_landmarks)
                 cv2.putText(frame, f'Gesture: {gesture}', (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
-                if gesture != "Unknown gesture":
-                    speak_text(gesture)
+#                if gesture != "Unknown gesture":
+#                    speak_text(gesture)
 
         # Display the frame
         cv2.imshow('ASL Recognition', frame)
