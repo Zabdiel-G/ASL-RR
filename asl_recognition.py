@@ -6,7 +6,7 @@ mp_hands = mp.solutions.hands
 mp_drawing = mp.solutions.drawing_utils
 
 # Start capturing video from the webcam
-cap = cv2.VideoCapture(0)
+vidcap = cv2.VideoCapture(0)
 
 # Initialize MediaPipe Hands
 with mp_hands.Hands(
@@ -15,8 +15,8 @@ with mp_hands.Hands(
         min_detection_confidence=0.7,
         min_tracking_confidence=0.5) as hands:
 
-    while cap.isOpened():
-        success, frame = cap.read()
+    while vidcap.isOpened():
+        success, frame = vidcap.read()
         if not success:
             print("Ignoring empty frame")
             continue
@@ -38,5 +38,5 @@ with mp_hands.Hands(
         if cv2.waitKey(5) & 0xFF == 27:  # Press 'Esc' to exit
             break
 
-cap.release()
+vidcap.release()
 cv2.destroyAllWindows()
