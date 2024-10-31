@@ -2,13 +2,22 @@
 
 import cv2
 import mediapipe as mp
+import torch
+from pytorch_i3d import InceptionI3d
 #import pyttsx3
 
 # Initialize MediaPipe Hands and drawing utilities
 mp_hands = mp.solutions.hands
 hands = mp_hands.Hands()
 mp_drawing = mp.solutions.drawing_utils
-#engine = pyttsx3.init()
+
+# Load the WLASL pre-trained I3D model
+model = InceptionI3d(num_classes=200)  # Set based on WLASL
+model.load_state_dict(torch.load("path/to/wlasl_weights.pth", map_location=torch.device('cpu')))
+model.eval()  # Set to evaluation mode
+
+# Define a mapping for model output to gesture labels
+class_mapping = {0: "Hello", 1: "Thank you", 2: "Yes", ...}  # Map as per WLASL classes
 
 def recognize_gesture(hand_landmarks):
     thumb_tip = hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_TIP]
