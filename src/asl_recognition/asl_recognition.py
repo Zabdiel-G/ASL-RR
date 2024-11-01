@@ -5,6 +5,7 @@ from models.pytorch_i3d import InceptionI3d
 import numpy as np
 
 # Load the ASL model
+#new
 model = InceptionI3d(num_classes=2000)  # Set for ASL2000
 model.load_state_dict(torch.load("models/archived/asl2000/ASL2000.pt", map_location=torch.device('cpu')))
 model.eval()

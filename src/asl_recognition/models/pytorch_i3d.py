@@ -10,6 +10,7 @@ import sys
 from collections import OrderedDict
 
 # Added by ZG for usage where temporal dimension = 1
+#new
 class AdaptiveAvgPool3d(nn.Module):
     def __init__(self, kernel_size=(2, 7, 7), stride=(1, 1, 1), padding=0):
         super(AdaptiveAvgPool3d, self).__init__()
