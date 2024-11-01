@@ -1,102 +1,77 @@
-#imported libraries
-
 import cv2
-import mediapipe as mp
 import torch
+import torch.nn.functional as F
 from models.pytorch_i3d import InceptionI3d
-#import pyttsx3
+import numpy as np
 
-# Initialize MediaPipe Hands and drawing utilities
-mp_hands = mp.solutions.hands
-hands = mp_hands.Hands()
-mp_drawing = mp.solutions.drawing_utils
-
-# Load the WLASL pre-trained I3D model
-model = InceptionI3d(num_classes=2000)  # Set based on WLASL
+# Load the ASL model
+model = InceptionI3d(num_classes=2000)  # Set for ASL2000
 model.load_state_dict(torch.load("models/archived/asl2000/ASL2000.pt", map_location=torch.device('cpu')))
-model.eval()  # Set to evaluation mode
+model.eval()
 
-# Define a mapping for model output to gesture labels
+# Load the class mapping
 class_mapping = {}
 with open("models/wlasl_class_list.txt", "r") as file:
     for line in file:
-        index, label = line.strip().split(maxsplit=1)  # Split only on the first whitespace
+        index, label = line.strip().split(maxsplit=1)
         class_mapping[int(index)] = label
-        
-def preprocess_landmarks(hand_landmarks):
-    # Example preprocessing for landmarks; adjust to fit model requirements
-    landmark_data = [[lm.x, lm.y, lm.z] for lm in hand_landmarks.landmark]
-    landmarks_tensor = torch.tensor(landmark_data).float().unsqueeze(0).unsqueeze(0)  # Reshape as necessary
-    return landmarks_tensor
 
-def recognize_gesture(hand_landmarks):
-    # thumb_tip = hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_TIP]
-    # thumb_ip = hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_IP]
-    # index_tip = hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_TIP]
-
-    # # Check if the thumb is pointing upwards
-    # is_thumb_up = thumb_tip.y < thumb_ip.y and thumb_tip.y < index_tip.y
-
-    # thumb_angle = abs(thumb_ip.x - thumb_tip.x)
-    # index_angle = abs(index_tip.x - thumb_ip.x)
-
-    # if is_thumb_up and thumb_angle < 0.1 and index_angle < 0.1:
-    #     return "Thumbs-up"
-    # return "Unknown gesture"
-    
-    # Recognize ASL gesture based on hand landmarks using the pre-trained I3D model.
-    landmarks_tensor = preprocess_landmarks(hand_landmarks)
-
-    # Perform gesture recognition using the model
-    with torch.no_grad():
-        prediction = model(landmarks_tensor)
-
-    # Get the predicted class index and map it to the gesture label
-    gesture_class = prediction.argmax(dim=1).item()
-    gesture_label = class_mapping.get(gesture_class, "Unknown gesture")
-    
-    return gesture_label
-
-#def speak_text(text):
-#    engine.say(text)
-#    engine.runAndWait()
-
-# Start capturing video from the webcam
+# Initialize camera
 vidcap = cv2.VideoCapture(0)
 
-# Initialize MediaPipe Hands
-with mp_hands.Hands(
-        static_image_mode=False,
-        max_num_hands=2,
-        min_detection_confidence=0.7,
-        min_tracking_confidence=0.5) as hands:
+# Settings
+frame_buffer = []
+frame_count = 0  # Counter to skip frames
+skip_frames = 5  # Process every 5th frame for smoother response
 
-    while vidcap.isOpened():
-        success, frame = vidcap.read()
-        if not success:
-            print("Ignoring empty frame")
-            continue
+print("Starting ASL recognition...")
 
-        # Convert the image from BGR to RGB for MediaPipe
-        rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+while vidcap.isOpened():
+    ret, frame = vidcap.read()
+    if not ret:
+        break
+
+    frame_count += 1
+
+    # Resize and process frame
+    resized_frame = cv2.resize(frame, (299, 299))  # Resize to model input size
+    rgb_frame = cv2.cvtColor(resized_frame, cv2.COLOR_BGR2RGB)
+    frame_tensor = torch.tensor(rgb_frame).float().permute(2, 0, 1) / 255.0  # Normalize and permute dimensions
+
+    # Append frame to buffer and maintain length of 8 frames
+    frame_buffer.append(frame_tensor)
+    if len(frame_buffer) > 8:
+        frame_buffer.pop(0)
+
+    # Run inference every 5 frames if we have 8 frames in buffer
+    if frame_count % skip_frames == 0 and len(frame_buffer) == 8:
+        video_input = torch.stack(frame_buffer, dim=1).unsqueeze(0)  # Shape: [1, 3, 8, 299, 299]
         
-        # Process the frame with MediaPipe to detect hands
-        results = hands.process(rgb_frame)
+        with torch.no_grad():
+            prediction = model(video_input)  # Run model inference
+            probabilities = F.softmax(prediction, dim=1)  # Apply softmax for confidence
+            max_prob, predicted_class_index = torch.max(probabilities, dim=1)  # Get max probability and class
+            max_prob = max_prob.item()
 
-        # Draw hand landmarks on the frame
-        if results.multi_hand_landmarks:
-            for hand_landmarks in results.multi_hand_landmarks:
-                mp_drawing.draw_landmarks(frame, hand_landmarks, mp_hands.HAND_CONNECTIONS)
-                gesture = recognize_gesture(hand_landmarks)
-                cv2.putText(frame, f'Gesture: {gesture}', (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
-#                if gesture != "Unknown gesture":
-#                    speak_text(gesture)
+        # Confidence threshold to filter low-confidence predictions
+        if max_prob > 0.7:
+            gesture_label = class_mapping.get(predicted_class_index.item(), "Unknown gesture")
+        else:
+            gesture_label = "No gesture detected"
 
-        # Display the frame
-        cv2.imshow('ASL Recognition', frame)
+        # Print predicted gesture
+        print("Predicted gesture:", gesture_label)
 
-        if cv2.waitKey(5) & 0xFF == 27:  # Press 'Esc' to exit
-            break
+        # Display prediction on the frame
+        cv2.putText(frame, f'Gesture: {gesture_label}', (10, 40), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
 
+    # Display the frame
+    cv2.imshow('ASL Recognition', frame)
+
+    if cv2.waitKey(1) & 0xFF == 27:  # Press Esc to exit
+        break
+
+# Release resources
 vidcap.release()
 cv2.destroyAllWindows()
+
