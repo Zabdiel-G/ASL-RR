@@ -1,7 +1,7 @@
 import cv2
 import mediapipe as mp
 import torch
-from utils import preprocess_frame_to_graph, load_class_mapping
+from utils import preprocess_frame, compute_difference, close_mediapipe, load_mapping
 from models.TGCN.tgcn_model import GCN_muti_att
 
 # Initialize MediaPipe Hands
@@ -16,39 +16,36 @@ model.load_state_dict(state_dict)
 model.eval()
 
 # Load class mapping
-class_mapping = load_class_mapping("models/wlasl_class_list.txt")
+class_mapping = load_mapping("models/wlasl_class_list.txt")
 
-def recognize_gesture(hands_tensor):
-    """
-    Recognize the gesture from tensor data of hand landmarks using the TGCN model.
-    """
-    with torch.no_grad():
-        outputs = model(hands_tensor)
-        _, predicted = torch.max(outputs, 1)
-        gesture_label = class_mapping[predicted.item()]
-    return gesture_label
+# Initialize camera
+cap = cv2.VideoCapture(0)
 
-# Video capture for gesture recognition
-vidcap = cv2.VideoCapture(0)
+while cap.isOpened():
+    ret, frame = cap.read()
+    if not ret:
+        break
 
-try:
-    while vidcap.isOpened():
-        success, frame = vidcap.read()
-        if not success:
-            continue
+    # Preprocess the frame to get it into the correct format
+    keypoints = preprocess_frame(frame)
+    if keypoints is not None:
+        features = compute_difference(keypoints)  # Compute differences or any other necessary transformations
+        if features is not None:
+            # Convert features to tensor and add a batch dimension
+            features_tensor = torch.tensor([features], dtype=torch.float32)
 
-        # Preprocess the frame to extract graph data suitable for TGCN
-        hands_tensor = preprocess_frame_to_graph(frame)
+            # Make predictions
+            with torch.no_grad():
+                outputs = model(features_tensor)
+                predicted_gesture = torch.argmax(outputs, dim=1)
+                print(f"Predicted Gesture: {predicted_gesture.item()}")
 
-        if hands_tensor is not None:
-            gesture = recognize_gesture(hands_tensor)
-            cv2.putText(frame, f'Gesture: {gesture}', (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+    # Display the frame
+    cv2.imshow('ASL Recognition', frame)
 
-        # Display the resulting frame
-        cv2.imshow('ASL Recognition', frame)
-        if cv2.waitKey(5) & 0xFF == 27:
-            break
-finally:
-    vidcap.release()
-    cv2.destroyAllWindows()
-    hands.close()
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+        break
+
+cap.release()
+cv2.destroyAllWindows()
+close_mediapipe()

@@ -7,48 +7,64 @@ import torch
 mp_hands = mp.solutions.hands
 hands = mp_hands.Hands(static_image_mode=False, max_num_hands=2, min_detection_confidence=0.7, min_tracking_confidence=0.5)
 
-def preprocess_frame_to_graph(frame):
+def preprocess_frame(frame):
     """
-    Processes a single video frame to extract hand landmarks and convert them into a tensor suitable for TGCN.
-
-    Args:
-        frame (np.array): A single frame from a video capture device.
-
-    Returns:
-        torch.Tensor: A tensor of hand landmarks suitable for graph neural network input.
+    Converts frame to a format suitable for gesture recognition.
     """
-    # Convert the image from BGR to RGB
-    image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-    image.flags.writeable = False  # Save memory by making image non-writable
+    try:
+        # Convert the image from BGR to RGB
+        image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        image.flags.writeable = False  # Save memory by making image non-writable
 
-    # Process the image to find hand landmarks
-    results = hands.process(image)
-    image.flags.writeable = True  # Make image writable again
+        # Process the image to find hand landmarks
+        results = hands.process(image)
+        image.flags.writeable = True  # Make image writable again
 
-    # Check if we have any hand landmarks
-    if results.multi_hand_landmarks:
-        # Here we assume each hand as a graph; you might need to adjust based on your TGCN model input expectations
-        all_hands_data = []
-        for hand_landmarks in results.multi_hand_landmarks:
-            # Extract landmark coordinates and normalize them by image dimensions
-            hand_data = np.array([[lm.x, lm.y, lm.z] for lm in hand_landmarks.landmark], dtype=np.float32)
-            all_hands_data.append(hand_data)
+        if results.multi_hand_landmarks:
+            keypoints = [np.array([[lm.x, lm.y, lm.z] for lm in hand_landmarks.landmark], dtype=np.float32)
+                        for hand_landmarks in results.multi_hand_landmarks]
+            return keypoints
+        return None
+    except Exception as e:
+        print("Failed to process frame:", str(e))
+        traceback.print_exc()
 
-        # Convert the list of hands to a PyTorch tensor
-        hands_tensor = torch.tensor(all_hands_data)
+        # Return None or an empty array if processing fails
+        return None
 
-        return hands_tensor
+def compute_difference(keypoints):
+    """
+    Computes differences between pairs of keypoints.
+    """
+    if not keypoints:
+        return None
 
-    # Return None or an empty tensor if no hands are detected
-    return None
+    # Assuming keypoints is a list of (x, y, z) tuples
+    # Flatten the keypoints list to a single array and reshape
+    keypoints_array = np.array(keypoints).flatten()
+    
+    # Check if the keypoints have the expected number of elements
+    expected_elements = 100 * 256  # Adjust this based on your model's expectation
+    if len(keypoints_array) < expected_elements:
+        # Pad the keypoints array if it is too short
+        keypoints_array = np.pad(keypoints_array, (0, expected_elements - len(keypoints_array)), mode='constant')
+    elif len(keypoints_array) > expected_elements:
+        # Truncate the keypoints array if it is too long
+        keypoints_array = keypoints_array[:expected_elements]
+
+    # Reshape to the shape expected by the model (100, 256)
+    features = keypoints_array.reshape((100, 256))
+
+    return features
+
 
 def close_mediapipe():
     """
-    Release MediaPipe resources. Call this function at the end of your script.
+    Release MediaPipe resources.
     """
     hands.close()
 
-def load_class_mapping(filepath = "models/wlasl_class_list.txt"):
+def load_mapping(filepath = "models/wlasl_class_list.txt"):
     """
     Loads the class mapping from a specified text file.
     """
