@@ -4,16 +4,9 @@ import torch
 from models.TGCN.tgcn_model import GCN
 from utils import preprocess_frame_to_graph, close_mediapipe
 
-<<<<<<< Updated upstream
-# Load the ASL model
-model = InceptionI3d(num_classes=2000)  # Set for ASL2000
-model.load_state_dict(torch.load("models/archived/asl2000/ASL2000.pt", map_location=torch.device('cpu')))
-model.eval()
-=======
 # Load the TGCN model
 model = load_tgcn_model('models/TGCN/tgcn_model.py')
 model.eval()  # Set the model to evaluation mode
->>>>>>> Stashed changes
 
 # Load class mapping
 class_mapping = load_class_mapping("models/wlasl_class_list.txt")
