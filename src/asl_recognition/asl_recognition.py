@@ -1,78 +1,51 @@
 import cv2
+import mediapipe as mp
 import torch
-import torch.nn.functional as F
-from models.pytorch_i3d import InceptionI3d
-import numpy as np
+from utils import preprocess_frame, compute_difference, close_mediapipe, load_mapping
+from models.TGCN.tgcn_model import GCN_muti_att
 
-# Load the ASL model
-#new
-model = InceptionI3d(num_classes=2000)  # Set for ASL2000
-model.load_state_dict(torch.load("models/archived/asl2000/ASL2000.pt", map_location=torch.device('cpu')))
+# Initialize MediaPipe Hands
+mp_hands = mp.solutions.hands
+hands = mp_hands.Hands(static_image_mode=False, max_num_hands=2, min_detection_confidence=0.7, min_tracking_confidence=0.5)
+
+# Load the trained TGCN model
+model_path = 'models/archived_TCGN/asl2000/ckpt.pth'
+model = GCN_muti_att(input_feature=100, hidden_feature=256, num_class=2000, p_dropout=0.3, num_stage=24)
+state_dict = torch.load(model_path, map_location=torch.device('cpu'), weights_only=True)
+model.load_state_dict(state_dict)
 model.eval()
 
-# Load the class mapping
-class_mapping = {}
-with open("models/wlasl_class_list.txt", "r") as file:
-    for line in file:
-        index, label = line.strip().split(maxsplit=1)
-        class_mapping[int(index)] = label
+# Load class mapping
+class_mapping = load_mapping("models/wlasl_class_list.txt")
 
 # Initialize camera
-vidcap = cv2.VideoCapture(0)
+cap = cv2.VideoCapture(0)
 
-# Settings
-frame_buffer = []
-frame_count = 0  # Counter to skip frames
-skip_frames = 5  # Process every 5th frame for smoother response
-
-print("Starting ASL recognition...")
-
-while vidcap.isOpened():
-    ret, frame = vidcap.read()
+while cap.isOpened():
+    ret, frame = cap.read()
     if not ret:
         break
 
-    frame_count += 1
+    # Preprocess the frame to get it into the correct format
+    keypoints = preprocess_frame(frame)
+    if keypoints is not None:
+        features = compute_difference(keypoints)  # Compute differences or any other necessary transformations
+        if features is not None:
+            # Convert features to tensor and add a batch dimension
+            features_tensor = torch.tensor([features], dtype=torch.float32)
 
-    # Resize and process frame
-    resized_frame = cv2.resize(frame, (299, 299))  # Resize to model input size
-    rgb_frame = cv2.cvtColor(resized_frame, cv2.COLOR_BGR2RGB)
-    frame_tensor = torch.tensor(rgb_frame).float().permute(2, 0, 1) / 255.0  # Normalize and permute dimensions
-
-    # Append frame to buffer and maintain length of 8 frames
-    frame_buffer.append(frame_tensor)
-    if len(frame_buffer) > 8:
-        frame_buffer.pop(0)
-
-    # Run inference every 5 frames if we have 8 frames in buffer
-    if frame_count % skip_frames == 0 and len(frame_buffer) == 8:
-        video_input = torch.stack(frame_buffer, dim=1).unsqueeze(0)  # Shape: [1, 3, 8, 299, 299]
-        
-        with torch.no_grad():
-            prediction = model(video_input)  # Run model inference
-            probabilities = F.softmax(prediction, dim=1)  # Apply softmax for confidence
-            max_prob, predicted_class_index = torch.max(probabilities, dim=1)  # Get max probability and class
-            max_prob = max_prob.item()
-
-        # Confidence threshold to filter low-confidence predictions
-        if max_prob > 0.7:
-            gesture_label = class_mapping.get(predicted_class_index.item(), "Unknown gesture")
-        else:
-            gesture_label = "No gesture detected"
-
-        # Print predicted gesture
-        print("Predicted gesture:", gesture_label)
-
-        # Display prediction on the frame
-        cv2.putText(frame, f'Gesture: {gesture_label}', (10, 40), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+            # Make predictions
+            with torch.no_grad():
+                outputs = model(features_tensor)
+                predicted_gesture = torch.argmax(outputs, dim=1)
+                print(f"Predicted Gesture: {predicted_gesture.item()}")
 
     # Display the frame
     cv2.imshow('ASL Recognition', frame)
 
-    if cv2.waitKey(1) & 0xFF == 27:  # Press Esc to exit
+    if cv2.waitKey(1) & 0xFF == ord('q'):
         break
 
-# Release resources
-vidcap.release()
+cap.release()
 cv2.destroyAllWindows()
-
+close_mediapipe()
