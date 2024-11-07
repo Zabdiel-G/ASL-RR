@@ -5,7 +5,7 @@ import mediapipe as mp
 import torch
 import torch.nn.functional as F
 import numpy as np
-from asl_utils import preprocess_frames, compute_difference, close_mediapipe, load_mapping
+from asl_utils import preprocess_frames, compute_difference, close_mediapipe, load_mapping, TemporalBuffer
 from models.TGCN.tgcn_model import GCN_muti_att
 
 # Ensure TensorFlow and any CUDA-based libraries do not attempt to use GPU
@@ -32,7 +32,10 @@ class_mapping = load_mapping("models/wlasl_class_list.txt")
 cap = cv2.VideoCapture(0)
 
 # Use a deque to store logits of the last N frames for averaging
-logits_window = deque(maxlen=144)
+# logits_window = deque(maxlen=144)
+
+# Initialize the Temporal Buffer for gesture recognition
+gesture_buffer = TemporalBuffer(model, sequence_length=15)  # Adjust sequence_length as needed
 
 while cap.isOpened():
     success, image = cap.read()
@@ -80,17 +83,25 @@ while cap.isOpened():
         features = compute_difference(keypoints)
         #print("Features (sample):", features[:10])
         if features is not None:
-            # Convert features to tensor
-            features_tensor = torch.tensor(features, dtype=torch.float32).unsqueeze(0)
-
-            with torch.no_grad():
-                outputs = model(features_tensor)
-                logits_window.append(outputs)
-                avg_logits = torch.mean(torch.stack(list(logits_window)), dim=0)
-                predicted_gesture = torch.argmax(avg_logits, dim=1)
-                gesture_name = class_mapping.get(predicted_gesture.item(), "Unknown Gesture")
-                print(f"Predicted Gesture (smoothed): {gesture_name}")
+            # Add features to the buffer and get the combined result for gesture prediction
+            # gesture_prediction = gesture_buffer.add_frame(features)
+            gesture_prediction = gesture_buffer.predict_gesture()
+            if gesture_prediction is not None:
+                gesture_name = class_mapping.get(gesture_prediction.item(), "Unknown Gesture")
+                print(f"Predicted Gesture: {gesture_name}")
                 cv2.putText(image, f'Gesture: {gesture_name}', (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
+
+            # Convert features to tensor
+            # features_tensor = torch.tensor(features, dtype=torch.float32).unsqueeze(0)
+
+            # with torch.no_grad():
+            #     outputs = model(features_tensor)
+            #     logits_window.append(outputs)
+            #     avg_logits = torch.mean(torch.stack(list(logits_window)), dim=0)
+            #     predicted_gesture = torch.argmax(avg_logits, dim=1)
+            #     gesture_name = class_mapping.get(predicted_gesture.item(), "Unknown Gesture")
+            #     print(f"Predicted Gesture: {gesture_name}")
+            #     cv2.putText(image, f'Gesture: {gesture_name}', (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
 
     # Display the frame
     cv2.imshow('ASL Recognition', image)

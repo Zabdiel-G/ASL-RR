@@ -45,6 +45,7 @@ def preprocess_frames(results):
 
         if keypoints:
             combined_keypoints = np.concatenate(keypoints).flatten()
+            print("Extracted keypoints:", combined_keypoints)
             return combined_keypoints
         return None
     except Exception as e:
@@ -103,13 +104,31 @@ def load_mapping(filepath = "models/wlasl_class_list.txt"):
             class_mapping[int(index)] = label
     return class_mapping
 
-class FrameBuffer:
-    def __init__(self, maxlen):
-        self.frames = deque(maxlen=maxlen)
-        
-    def add(self, frame):
-        self.frames.append(frame)
-    
-    def is_full(self):
-        return len(self.frames) == self.frames.maxlen
-    
+class TemporalBuffer:
+    def __init__(self, model, sequence_length=15):
+        self.model = model
+        self.buffer = deque(maxlen=sequence_length)
+
+    def add_frame(self, keypoints):
+        print("Received keypoints for buffer:", keypoints)
+        if keypoints is not None and len(keypoints) > 0:
+            print("Adding keypoints to buffer")
+            self.buffer.append(keypoints)
+            if len(self.buffer) == self.buffer.maxlen:
+                return self.predict_gesture()
+            else:
+                print("Buffer size:", len(self.buffer), "/", self.buffer.maxlen)
+        else:
+            print("Invalid or empty keypoints received; not adding to buffer.")
+        return None
+
+    def predict_gesture(self):
+        if len(self.buffer) > 0:
+            input_sequence = np.array(self.buffer)
+            input_tensor = torch.tensor(input_sequence, dtype=torch.float32)
+            input_tensor = input_tensor.unsqueeze(0)  # Adjusting dimensions as needed
+            prediction = self.model(input_tensor)
+            return prediction
+        else:
+            print("Buffer is empty, no prediction made.")
+            return None
