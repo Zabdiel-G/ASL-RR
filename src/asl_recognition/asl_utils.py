@@ -66,10 +66,6 @@ def compute_difference(keypoints):
         return None
 
     try:
-        # Your model might require specific features based on the differences between keypoints.
-        # For demonstration, we compute a simple difference vector between subsequent keypoints.
-        # More complex features might involve differences between specific points or other statistical features.
-
         # Example of computing difference: take difference between each pair of consecutive keypoints
         differences = np.diff(keypoints, axis=0)
 
@@ -89,33 +85,6 @@ def compute_difference(keypoints):
     except Exception as e:
         print("Error computing differences:", str(e))
         return None
-
-# def compute_difference(keypoints):
-#     """
-#     Computes differences between pairs of keypoints.
-#     Ensures output is in the format and size expected by the model.
-#     """
-#     if not keypoints:
-#         return None
-
-#     try:
-#         # Assuming each hand has 21 keypoints with x, y, z coordinates
-#         keypoints_flat = np.array([kp for hand in keypoints for kp in hand]).flatten()
-
-#         # Compute the size based on your model's expectations
-#         expected_size = 5500  # Update to the correct size if different
-#         if len(keypoints_flat) < expected_size:
-#             keypoints_flat = np.pad(keypoints_flat, (0, expected_size - len(keypoints_flat)), mode='constant')
-#         elif len(keypoints_flat) > expected_size:
-#             keypoints_flat = keypoints_flat[:expected_size]
-
-#         # Reshape for the model: assuming the model expects (55, 100)
-#         features = keypoints_flat.reshape((55, 100))
-#         return features
-#     except Exception as e:
-#         print("Error computing differences:", str(e))
-#         traceback.print_exc()
-#         return None
 
 def close_mediapipe():
     """
