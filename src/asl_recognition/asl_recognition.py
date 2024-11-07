@@ -84,8 +84,8 @@ while cap.isOpened():
         #print("Features (sample):", features[:10])
         if features is not None:
             # Add features to the buffer and get the combined result for gesture prediction
-            # gesture_prediction = gesture_buffer.add_frame(features)
-            gesture_prediction = gesture_buffer.predict_gesture()
+            gesture_prediction = gesture_buffer.add_frame(features)
+            # gesture_prediction = gesture_buffer.predict_gesture()
             if gesture_prediction is not None:
                 gesture_name = class_mapping.get(gesture_prediction.item(), "Unknown Gesture")
                 print(f"Predicted Gesture: {gesture_name}")
