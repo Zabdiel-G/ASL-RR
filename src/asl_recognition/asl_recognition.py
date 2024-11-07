@@ -100,7 +100,8 @@ while cap.isOpened():
                 avg_logits = torch.mean(torch.stack(list(logits_window)), dim=0)
                 predicted_gesture = torch.argmax(avg_logits, dim=1)
                 gesture_name = class_mapping.get(predicted_gesture.item(), "Unknown Gesture")
-                print(f"Predicted Gesture (smoothed): {gesture_name}")
+                print(f"Predicted Gesture: {gesture_name}")
+                cv2.putText(image, f'Gesture: {gesture_name}', (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
 
     # Display the frame
     cv2.imshow('ASL Recognition', image)
