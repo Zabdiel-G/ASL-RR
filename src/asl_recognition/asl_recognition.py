@@ -83,17 +83,6 @@ while cap.isOpened():
             # Convert features to tensor
             features_tensor = torch.tensor(features, dtype=torch.float32).unsqueeze(0)
 
-            # Debug: Print initial shape of features_tensor
-            # print("Features Tensor Shape:", features_tensor.shape)
-
-            # Ensure correct input shape for the model
-            # features_tensor = features_tensor.view(1, 1, 25600)
-            # features_tensor = F.adaptive_avg_pool1d(features_tensor, 5500)
-            # features_tensor = features_tensor.view(1, 55, 100)
-
-            # Debug: Print final shape of features_tensor to verify correctness
-            # print("Final Features Tensor Shape:", features_tensor.shape)
-
             with torch.no_grad():
                 outputs = model(features_tensor)
                 logits_window.append(outputs)
@@ -101,6 +90,7 @@ while cap.isOpened():
                 predicted_gesture = torch.argmax(avg_logits, dim=1)
                 gesture_name = class_mapping.get(predicted_gesture.item(), "Unknown Gesture")
                 print(f"Predicted Gesture (smoothed): {gesture_name}")
+                cv2.putText(image, f'Gesture: {gesture_name}', (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
 
     # Display the frame
     cv2.imshow('ASL Recognition', image)
