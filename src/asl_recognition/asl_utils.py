@@ -4,6 +4,7 @@ import mediapipe as mp
 import numpy as np
 import torch
 from collections import deque
+# from models.TGCN.gen_features import compute_difference
 
 # Initialize MediaPipe Hands
 mp_holistic = mp.solutions.holistic
@@ -12,6 +13,35 @@ holistic = mp_holistic.Holistic(
     min_detection_confidence=0.5, 
     min_tracking_confidence=0.5
 )
+
+keypoint_map = {
+    0: 0,  # Nose
+    5: 15,  # Right eye
+    2: 16,  # Left eye
+    7: 18,  # Left ear
+    8: 17,  # Right ear
+    11: 5,  # Left shoulder
+    12: 2,  # Right shoulder
+    13: 6,  # Left elbow
+    14: 3,  # Right elbow
+    15: 7,  # Left wrist
+    16: 4   # Right wrist
+}
+
+skeleton = [
+    (0, 1),  # Nose to Neck
+    (1, 2),  # Neck to Right Shoulder
+    (2, 3),  # Right Shoulder to Right Elbow
+    (3, 4),  # Right Elbow to Right Wrist
+    (1, 5),  # Neck to Left Shoulder
+    (5, 6),  # Left Shoulder to Left Elbow
+    (6, 7),  # Left Elbow to Left Wrist
+    (1, 8),  # Neck to Mid Hip
+    (0, 16), # Nose to Left eye
+    (0, 15), # Nose to Right eye
+    (16, 18), # Left eye to left ear
+    (15, 17)  # Right eye to right ear
+]
 
 def preprocess_frames(results):
     """
@@ -50,6 +80,35 @@ def preprocess_frames(results):
     except Exception as e:
         print(f"Failed to preprocess frame: {str(e)}")
         return None
+    
+# new
+# def compute_difference(x):
+#     """
+#     Compute differences between keypoints to capture motion dynamics.
+#     """
+#     if len(x) < 2:
+#         return torch.zeros(1, dtype=torch.float32)  # Handling for insufficient data
+
+#     diff = []
+#     for i in range(len(x)-1):
+#         diff.append(x[i+1] - x[i])
+    
+#     return torch.FloatTensor(diff)
+
+# def process_keypoints(keypoints):
+#     """
+#     Simplified function to process keypoints extracted in real-time from MediaPipe.
+#     """
+#     # Example: Assume keypoints is a flat list of x, y coordinates
+#     keypoints = torch.FloatTensor(keypoints)
+#     x = keypoints[0::3]  # Assuming x, y, conf sequence
+#     y = keypoints[1::3]
+
+#     x_diff = compute_difference(x)
+#     y_diff = compute_difference(y)
+
+#     features = torch.cat([x_diff, y_diff], dim=0)  # Concatenate x and y differences
+#     return features
 
 def compute_difference(keypoints):
     """

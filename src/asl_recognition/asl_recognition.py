@@ -5,7 +5,7 @@ import mediapipe as mp
 import torch
 import torch.nn.functional as F
 import numpy as np
-from asl_utils import preprocess_frames, compute_difference, close_mediapipe, load_mapping
+from asl_utils import preprocess_frames, compute_difference, close_mediapipe, load_mapping, keypoint_map, skeleton
 from models.TGCN.tgcn_model import GCN_muti_att
 
 # Ensure TensorFlow and any CUDA-based libraries do not attempt to use GPU
@@ -42,36 +42,32 @@ while cap.isOpened():
     image.flags.writeable = False
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
     results = holistic.process(image)
-    # print(results)
 
-    # Draw the landmarks on the frame for visualization
-    image.flags.writeable = True
-    image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
-    mp_drawing.draw_landmarks(
-        image,
-        results.face_landmarks,
-        mp_holistic.FACEMESH_CONTOURS,
-        landmark_drawing_spec=None,
-        connection_drawing_spec=mp_drawing_styles
-        .get_default_face_mesh_contours_style())
-    mp_drawing.draw_landmarks(
-        image,
-        results.pose_landmarks,
-        mp_holistic.POSE_CONNECTIONS,
-        landmark_drawing_spec=mp_drawing_styles
-        .get_default_pose_landmarks_style())
-    mp_drawing.draw_landmarks(
-        image,
-        results.left_hand_landmarks,
-        mp_holistic.HAND_CONNECTIONS,
-        landmark_drawing_spec=mp_drawing_styles
-        .get_default_hand_landmarks_style())
-    mp_drawing.draw_landmarks(
-        image,
-        results.right_hand_landmarks,
-        mp_holistic.HAND_CONNECTIONS,
-        landmark_drawing_spec=mp_drawing_styles
-        .get_default_hand_landmarks_style())
+    if results.pose_landmarks:
+        landmarks = results.pose_landmarks.landmark
+
+        # Estimate Neck and Mid Hip
+        neck_x = (landmarks[11].x + landmarks[12].x) / 2
+        neck_y = (landmarks[11].y + landmarks[12].y) / 2
+        mid_hip_x = (landmarks[23].x + landmarks[24].x) / 2
+        mid_hip_y = (landmarks[23].y + landmarks[24].y) / 2
+
+        # Add estimated points to the keypoint_map
+        points = {1: (int(neck_x * image.shape[1]), int(neck_y * image.shape[0])),
+                  8: (int(mid_hip_x * image.shape[1]), int(mid_hip_y * image.shape[0]))}
+
+        # Draw keypoints based on mapping and estimated points on the frame
+        for mp_index, op_index in keypoint_map.items():
+            points[op_index] = (int(landmarks[mp_index].x * image.shape[1]), int(landmarks[mp_index].y * image.shape[0]))
+
+        # Draw keypoints
+        for point in points.values():
+            cv2.circle(image, point, 5, (255, 0, 0), -1)
+
+        # Draw skeleton
+        for start, end in skeleton:
+            if start in points and end in points:
+                cv2.line(image, points[start], points[end], (0, 0, 255), 2)
 
     # Pass the 'results' object to the preprocessing function
     keypoints = preprocess_frames(results)
@@ -82,17 +78,6 @@ while cap.isOpened():
         if features is not None:
             # Convert features to tensor
             features_tensor = torch.tensor(features, dtype=torch.float32).unsqueeze(0)
-
-            # Debug: Print initial shape of features_tensor
-            # print("Features Tensor Shape:", features_tensor.shape)
-
-            # Ensure correct input shape for the model
-            # features_tensor = features_tensor.view(1, 1, 25600)
-            # features_tensor = F.adaptive_avg_pool1d(features_tensor, 5500)
-            # features_tensor = features_tensor.view(1, 55, 100)
-
-            # Debug: Print final shape of features_tensor to verify correctness
-            # print("Final Features Tensor Shape:", features_tensor.shape)
 
             with torch.no_grad():
                 outputs = model(features_tensor)
