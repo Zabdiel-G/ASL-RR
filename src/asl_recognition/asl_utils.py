@@ -14,18 +14,35 @@ holistic = mp_holistic.Holistic(
     min_tracking_confidence=0.5
 )
 
+# keypoint_map = {
+#     0: 0,  # Nose
+#     5: 15,  # Right eye
+#     2: 16,  # Left eye
+#     7: 18,  # Left ear
+#     8: 17,  # Right ear
+#     11: 5,  # Left shoulder
+#     12: 2,  # Right shoulder
+#     13: 6,  # Left elbow
+#     14: 3,  # Right elbow
+#     15: 7,  # Left wrist
+#     16: 4   # Right wrist
+# }
+
+# order of openpose
 keypoint_map = {
     0: 0,  # Nose
+    # 1, Neck
+    12: 2,  # Right shoulder
+    14: 3,  # Right elbow
+    16: 4,   # Right wrist
+    11: 5,  # Left shoulder
+    13: 6,  # Left elbow
+    15: 7,  # Left wrist
+    # 8, Mid Hip
     5: 15,  # Right eye
     2: 16,  # Left eye
-    7: 18,  # Left ear
-    8: 17,  # Right ear
-    11: 5,  # Left shoulder
-    12: 2,  # Right shoulder
-    13: 6,  # Left elbow
-    14: 3,  # Right elbow
-    15: 7,  # Left wrist
-    16: 4   # Right wrist
+    8: 17,  # Right ear 
+    7: 18  # Left ear
 }
 
 skeleton = [
@@ -43,72 +60,90 @@ skeleton = [
     (15, 17)  # Right eye to right ear
 ]
 
+# def preprocess_frames(results):
+#     """
+#     Extracts keypoints from the results of the MediaPipe Holistic model.
+#     """
+#     try:
+#         # Check if the input is the expected type
+#         if not isinstance(results, mp.solutions.holistic.Holistic.__class__):
+#             raise ValueError(f"Expected results to be of type SolutionOutputs, got {results}")
+        
+#         keypoints = []
+
+#         # Check for face landmarks
+#         if results.face_landmarks:
+#             face_keypoints = np.array([[lm.x, lm.y, lm.z] for lm in results.face_landmarks.landmark], dtype=np.float32)
+#             keypoints.append(face_keypoints)
+
+#         # Check for hand landmarks
+#         if results.left_hand_landmarks:
+#             left_hand_keypoints = np.array([[lm.x, lm.y, lm.z] for lm in results.left_hand_landmarks.landmark], dtype=np.float32)
+#             keypoints.append(left_hand_keypoints)
+
+#         if results.right_hand_landmarks:
+#             right_hand_keypoints = np.array([[lm.x, lm.y, lm.z] for lm in results.right_hand_landmarks.landmark], dtype=np.float32)
+#             keypoints.append(right_hand_keypoints)
+
+#         # Check for pose landmarks
+#         if results.pose_landmarks:
+#             pose_keypoints = np.array([[lm.x, lm.y, lm.z] for lm in results.pose_landmarks.landmark], dtype=np.float32)
+#             keypoints.append(pose_keypoints)
+
+#         if keypoints:
+#             combined_keypoints = np.concatenate(keypoints).flatten()
+#             return combined_keypoints
+#         return None
+#     except Exception as e:
+#         print(f"Failed to preprocess frame: {str(e)}")
+#         return None
+    
 def preprocess_frames(results):
     """
-    Extracts keypoints from the results of the MediaPipe Holistic model.
+    Extracts and combines keypoints from the results of the MediaPipe Holistic model,
+    according to the predefined keypoint_map and includes confidence scores.
     """
     try:
         # Check if the input is the expected type
         if not isinstance(results, mp.solutions.holistic.Holistic.__class__):
-            raise ValueError(f"Expected results to be of type SolutionOutputs, got {results}")
+            raise ValueError(f"Expected results to be of type mp.solutions.holistic.Holistic, got {type(results)}")
         
-        keypoints = []
+        # Initialize an array to hold the combined keypoints
+        combined_keypoints = []
 
-        # Check for face landmarks
-        if results.face_landmarks:
-            face_keypoints = np.array([[lm.x, lm.y, lm.z] for lm in results.face_landmarks.landmark], dtype=np.float32)
-            keypoints.append(face_keypoints)
+        # Function to extract keypoints using keypoint_map
+        def get_keypoints(landmarks, keypoint_map):
+            keypoints = []
+            for index, model_index in keypoint_map.items():
+                if index < len(landmarks):
+                    lm = landmarks[index]
+                    keypoints.extend([lm.x, lm.y, lm.visibility])
+            return keypoints
 
-        # Check for hand landmarks
+        # Extract and combine keypoints based on the mapping
+        if results.pose_landmarks:
+            pose_keypoints = get_keypoints(results.pose_landmarks.landmark, keypoint_map)
+            combined_keypoints.extend(pose_keypoints)
+            # print("Pose keypoints:", pose_keypoints)  # Debug print
+
+        # Extract left and right hand keypoints
         if results.left_hand_landmarks:
-            left_hand_keypoints = np.array([[lm.x, lm.y, lm.z] for lm in results.left_hand_landmarks.landmark], dtype=np.float32)
-            keypoints.append(left_hand_keypoints)
+            left_hand_keypoints = [[lm.x, lm.y, lm.visibility] for lm in results.left_hand_landmarks.landmark]
+            combined_keypoints.extend(np.array(left_hand_keypoints).flatten())
+            # print("Left hand keypoints:", left_hand_keypoints)  # Debug print
 
         if results.right_hand_landmarks:
-            right_hand_keypoints = np.array([[lm.x, lm.y, lm.z] for lm in results.right_hand_landmarks.landmark], dtype=np.float32)
-            keypoints.append(right_hand_keypoints)
+            right_hand_keypoints = [[lm.x, lm.y, lm.visibility] for lm in results.right_hand_landmarks.landmark]
+            combined_keypoints.extend(np.array(right_hand_keypoints).flatten())
+            # print("Right hand keypoints:", right_hand_keypoints)  # Debug print
 
-        # Check for pose landmarks
-        if results.pose_landmarks:
-            pose_keypoints = np.array([[lm.x, lm.y, lm.z] for lm in results.pose_landmarks.landmark], dtype=np.float32)
-            keypoints.append(pose_keypoints)
-
-        if keypoints:
-            combined_keypoints = np.concatenate(keypoints).flatten()
-            return combined_keypoints
-        return None
+        # Print combined keypoints
+        print("Combined keypoints:", combined_keypoints)
+        return np.array(combined_keypoints)
     except Exception as e:
         print(f"Failed to preprocess frame: {str(e)}")
         return None
     
-# new
-# def compute_difference(x):
-#     """
-#     Compute differences between keypoints to capture motion dynamics.
-#     """
-#     if len(x) < 2:
-#         return torch.zeros(1, dtype=torch.float32)  # Handling for insufficient data
-
-#     diff = []
-#     for i in range(len(x)-1):
-#         diff.append(x[i+1] - x[i])
-    
-#     return torch.FloatTensor(diff)
-
-# def process_keypoints(keypoints):
-#     """
-#     Simplified function to process keypoints extracted in real-time from MediaPipe.
-#     """
-#     # Example: Assume keypoints is a flat list of x, y coordinates
-#     keypoints = torch.FloatTensor(keypoints)
-#     x = keypoints[0::3]  # Assuming x, y, conf sequence
-#     y = keypoints[1::3]
-
-#     x_diff = compute_difference(x)
-#     y_diff = compute_difference(y)
-
-#     features = torch.cat([x_diff, y_diff], dim=0)  # Concatenate x and y differences
-#     return features
 
 def compute_difference(keypoints):
     """
