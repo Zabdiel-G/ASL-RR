@@ -147,8 +147,8 @@ def significant_movement(frame_buffer, threshold=0.01):
 
 # Parameters
 cap = cv2.VideoCapture(0)
-cap.set(cv2.CAP_PROP_FRAME_WIDTH, 256)
-cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 256)
+cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1080)
+cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
 
 frame_rate = 100
 sampling_duration = 4
@@ -157,13 +157,17 @@ frame_buffer = deque(maxlen=frame_rate * sampling_duration)
 is_detecting = False
 
 start_time = time.time()
+word_count = 0
 
 while cap.isOpened():
     ret, frame = cap.read()
     if not ret:
         break
 
-    image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+    # image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+    image = frame.copy()
+    image.flags.writeable = False
+    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
     # Process the frame with MediaPipe
     result = holistic.process(image)
@@ -171,6 +175,32 @@ while cap.isOpened():
     # Preprocess the frame to extract keypoints
     _, keypoints = preprocess_frames(result)
     frame_buffer.append(keypoints)
+
+    if result.pose_landmarks:
+        landmarks = result.pose_landmarks.landmark
+
+        # Estimate Neck and Mid Hip
+        neck_x = (landmarks[11].x + landmarks[12].x) / 2
+        neck_y = (landmarks[11].y + landmarks[12].y) / 2
+        mid_hip_x = (landmarks[23].x + landmarks[24].x) / 2
+        mid_hip_y = (landmarks[23].y + landmarks[24].y) / 2
+
+        # Add estimated points to the keypoint_map
+        points = {1: (int(neck_x * frame.shape[1]), int(neck_y * frame.shape[0])),
+                  8: (int(mid_hip_x * frame.shape[1]), int(mid_hip_y * frame.shape[0]))}
+
+        # Draw keypoints based on mapping and estimated points on the frame
+        for mp_index, op_index in keypoint_map.items():
+            points[op_index] = (int(landmarks[mp_index].x * frame.shape[1]), int(landmarks[mp_index].y * frame.shape[0]))
+
+        # Draw keypoints
+        for point in points.values():
+            cv2.circle(frame, point, 5, (255, 0, 0), -1)
+
+        # Draw skeleton
+        for start, end in skeleton:
+            if start in points and end in points:
+                cv2.line(frame, points[start], points[end], (255, 0, 255), 2)
 
     elapsed_time = time.time() - start_time
 
@@ -196,10 +226,15 @@ while cap.isOpened():
                         for cls, prob in zip(top_classes, top_probs)
                     ]
 
+                word_count += 1
+
                 # Print the top predictions
                 print("Top Predictions:")
                 for label, confidence in top_predictions:
                     print(f"{label}: {confidence:.2f}")
+                
+                print(f"Word: {word_count}")
+                print("")
             else:
                 print("Not enough frames to perform prediction.")
         else:
@@ -209,7 +244,7 @@ while cap.isOpened():
         start_time = time.time()
 
     # Display current detection state
-    state_text = "STARTING" if is_detecting else "NOT STARTING"
+    state_text = "Capturing" if is_detecting else "Idle"
     cv2.putText(
         frame,
         f"State: {state_text}",
@@ -229,7 +264,20 @@ while cap.isOpened():
         (10, 100),  # Display below the state text
         cv2.FONT_HERSHEY_SIMPLEX,
         1,
-        (255, 255, 255),  # White color for the timer text
+        (0, 255, 0),  # White color for the timer text
+        2,
+        cv2.LINE_AA,
+    )
+
+    # Display word count
+    word_count_text = f"Detected Words: {word_count}"
+    cv2.putText(
+        frame,
+        word_count_text,
+        (10, 150),  # Position below the timer
+        cv2.FONT_HERSHEY_SIMPLEX,
+        1,
+        (0, 0, 0),  # White color for text
         2,
         cv2.LINE_AA,
     )
