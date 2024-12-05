@@ -3,6 +3,7 @@ import os
 import cv2
 import mediapipe as mp
 import torch
+import sys
 import torch.nn.functional as F
 import numpy as np
 from asl_utils import preprocess_frames, compute_difference, close_mediapipe, load_mapping, keypoint_map, skeleton
@@ -33,6 +34,11 @@ cap = cv2.VideoCapture(0)
 
 # Use a deque to store logits of the last N frames for averaging
 logits_window = deque(maxlen=144)
+
+# String to accumulate recognized gesture names
+gesture_sentence = ""
+
+is_recording = False
 
 while cap.isOpened():
     success, image = cap.read()
@@ -85,12 +91,28 @@ while cap.isOpened():
                 avg_logits = torch.mean(torch.stack(list(logits_window)), dim=0)
                 predicted_gesture = torch.argmax(avg_logits, dim=1)
                 gesture_name = class_mapping.get(predicted_gesture.item(), "Unknown Gesture")
+
+                if is_recording:
+                    gesture_sentence += gesture_name + " "          
                 print(f"Predicted Gesture: {gesture_name}")
                 cv2.putText(image, f'Gesture: {gesture_name}', (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
 
     # Display the frame
     cv2.imshow('ASL Recognition', image)
 
+    with open("ASL_to_Text.txt", "w") as file:
+        file.write(gesture_sentence.strip())  # Strip trailing space
+
+            # Start recording with 's' key
+    if cv2.waitKey(1) == ord('s'):
+        is_recording = True
+        print("Recording started...")
+
+    # End recording with 'e' key
+    if cv2.waitKey(1) == ord('e'):
+        is_recording = False
+        print("Recording ended...")
+   
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
 
