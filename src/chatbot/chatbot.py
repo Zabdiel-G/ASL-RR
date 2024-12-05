@@ -62,24 +62,24 @@ def generate_asl_response(input_text):
     
     return asl_response
 
-# File path for input
-file_path = "../asl_recognition/ASL_to_Text.txt"
+def main():
+    # File path for input
+    file_path = "asl_recognition/ASL_to_Text.txt"
 
-# Check if file exists
-if os.path.exists(file_path):
-    with open(file_path, 'r', encoding='utf-8') as file:
-        inputs = file.readlines()
-    
-    print("Processing inputs from file:")
-    for text in inputs:
-        text = text.strip()
-        if text:  # Skip empty lines
-            print(f"\nInput: {text}")
-            print("ASL-Structured Response:", generate_asl_response(text))
-else:
-    print(f"File not found: {file_path}")
+    # Check if file exists
+    if os.path.exists(file_path):
+        with open(file_path, 'r', encoding='utf-8') as file:
+            inputs = file.readlines()
+        
+        print("Processing inputs from file:")
+        for text in inputs:
+            text = text.strip()
+            if text:  # Skip empty lines
+                print(f"\nInput: {text}")
+                print("ASL-Structured Response:", generate_asl_response(text))
+    else:
+        print(f"File not found: {file_path}")
 
-
-
-
+if __name__ == "__main__":
+    main()
 

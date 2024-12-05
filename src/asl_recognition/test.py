@@ -4,8 +4,8 @@ import os
 import numpy as np
 import torch
 from collections import deque
-from models.TGCN.tgcn_model import GCN_muti_att  # Import your model class
-from asl_utils import preprocess_frames, compute_difference, close_mediapipe, load_mapping, keypoint_map, skeleton
+from asl_recognition.models.TGCN.tgcn_model import GCN_muti_att  # Import your model class
+from asl_recognition.asl_utils import preprocess_frames, compute_difference, close_mediapipe, load_mapping, keypoint_map, skeleton
 import time
 import random
 
@@ -14,19 +14,14 @@ import random
 num_samples = 50 # Ensure this matches the input expected by your model
 input_feature = num_samples * 2
 model = GCN_muti_att(input_feature=input_feature, hidden_feature=256, num_class=2000, p_dropout=0.3, num_stage=24)
-model_path = os.path.join("models", "archived_TCGN", "asl2000", "ckpt.pth")
+model_path = os.path.join("asl_recognition", "models", "archived_TCGN", "asl2000", "ckpt.pth")
 model.load_state_dict(torch.load(model_path, map_location=torch.device('cpu')))
 model.eval()
-class_mapping = load_mapping("models/wlasl_class_list.txt")
+class_mapping = load_mapping("asl_recognition/models/wlasl_class_list.txt")
 
 # Initialize MediaPipe Holistic
 mp_holistic = mp.solutions.holistic
 holistic = mp_holistic.Holistic(min_detection_confidence=0.7, min_tracking_confidence=0.7)
-
-# String to accumulate recognized gesture names
-gesture_sentence = ""
-
-is_recording = False
 
 # Keypoint mapping and skeleton for visualization
 keypoint_map = {
@@ -149,164 +144,171 @@ def significant_movement(frame_buffer, threshold=0.01):
     movement = np.abs(np.diff(frame_buffer, axis=0))
     return np.any(movement > threshold)
 
-# Parameters
-cap = cv2.VideoCapture(0)
-cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1080)
-cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
+def main():
+    # Parameters
+    cap = cv2.VideoCapture(0)
+    cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1080)
+    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
 
-frame_rate = 100
-sampling_duration = 4
-frames_to_extract = 50  # Number of frames to sample
-frame_buffer = deque(maxlen=frame_rate * sampling_duration)
-is_detecting = False
+    frame_rate = 100
+    sampling_duration = 4
+    frames_to_extract = 50  # Number of frames to sample
+    frame_buffer = deque(maxlen=frame_rate * sampling_duration)
+    # String to accumulate recognized gesture names
+    gesture_sentence = ""
+    is_recording = False
+    is_detecting = False
 
-start_time = time.time()
-word_count = 0
+    start_time = time.time()
+    word_count = 0
 
-while cap.isOpened():
-    ret, frame = cap.read()
-    if not ret:
-        break
+    while cap.isOpened():
+        ret, frame = cap.read()
+        if not ret:
+            break
 
-    # image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-    image = frame.copy()
-    image.flags.writeable = False
-    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        # image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        image = frame.copy()
+        image.flags.writeable = False
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
-    # Process the frame with MediaPipe
-    result = holistic.process(image)
+        # Process the frame with MediaPipe
+        result = holistic.process(image)
 
-    # Preprocess the frame to extract keypoints
-    _, keypoints = preprocess_frames(result)
-    frame_buffer.append(keypoints)
+        # Preprocess the frame to extract keypoints
+        _, keypoints = preprocess_frames(result)
+        frame_buffer.append(keypoints)
 
-    if result.pose_landmarks:
-        landmarks = result.pose_landmarks.landmark
+        if result.pose_landmarks:
+            landmarks = result.pose_landmarks.landmark
 
-        # Estimate Neck and Mid Hip
-        neck_x = (landmarks[11].x + landmarks[12].x) / 2
-        neck_y = (landmarks[11].y + landmarks[12].y) / 2
-        mid_hip_x = (landmarks[23].x + landmarks[24].x) / 2
-        mid_hip_y = (landmarks[23].y + landmarks[24].y) / 2
+            # Estimate Neck and Mid Hip
+            neck_x = (landmarks[11].x + landmarks[12].x) / 2
+            neck_y = (landmarks[11].y + landmarks[12].y) / 2
+            mid_hip_x = (landmarks[23].x + landmarks[24].x) / 2
+            mid_hip_y = (landmarks[23].y + landmarks[24].y) / 2
 
-        # Add estimated points to the keypoint_map
-        points = {1: (int(neck_x * frame.shape[1]), int(neck_y * frame.shape[0])),
-                  8: (int(mid_hip_x * frame.shape[1]), int(mid_hip_y * frame.shape[0]))}
+            # Add estimated points to the keypoint_map
+            points = {1: (int(neck_x * frame.shape[1]), int(neck_y * frame.shape[0])),
+                    8: (int(mid_hip_x * frame.shape[1]), int(mid_hip_y * frame.shape[0]))}
 
-        # Draw keypoints based on mapping and estimated points on the frame
-        for mp_index, op_index in keypoint_map.items():
-            points[op_index] = (int(landmarks[mp_index].x * frame.shape[1]), int(landmarks[mp_index].y * frame.shape[0]))
+            # Draw keypoints based on mapping and estimated points on the frame
+            for mp_index, op_index in keypoint_map.items():
+                points[op_index] = (int(landmarks[mp_index].x * frame.shape[1]), int(landmarks[mp_index].y * frame.shape[0]))
 
-        # Draw keypoints
-        for point in points.values():
-            cv2.circle(frame, point, 5, (255, 0, 0), -1)
+            # Draw keypoints
+            for point in points.values():
+                cv2.circle(frame, point, 5, (255, 0, 0), -1)
 
-        # Draw skeleton
-        for start, end in skeleton:
-            if start in points and end in points:
-                cv2.line(frame, points[start], points[end], (255, 0, 255), 2)
+            # Draw skeleton
+            for start, end in skeleton:
+                if start in points and end in points:
+                    cv2.line(frame, points[start], points[end], (255, 0, 255), 2)
 
-    elapsed_time = time.time() - start_time
+        elapsed_time = time.time() - start_time
 
-    if is_detecting and elapsed_time >= sampling_duration:
-        if significant_movement(frame_buffer, threshold=0.01):
-            print(f"Current frame buffer length: {len(frame_buffer)}")
-            if len(frame_buffer) >= frames_to_extract:
-                sampled_frames = random.sample(list(frame_buffer), frames_to_extract)
+        if is_detecting and elapsed_time >= sampling_duration:
+            if significant_movement(frame_buffer, threshold=0.01):
+                print(f"Current frame buffer length: {len(frame_buffer)}")
+                if len(frame_buffer) >= frames_to_extract:
+                    sampled_frames = random.sample(list(frame_buffer), frames_to_extract)
 
-                input_data = np.stack(sampled_frames).T
-                input_data = input_data.reshape(55, 100)
-                input_tensor = torch.tensor(input_data, dtype=torch.float32).unsqueeze(0)
+                    input_data = np.stack(sampled_frames).T
+                    input_data = input_data.reshape(55, 100)
+                    input_tensor = torch.tensor(input_data, dtype=torch.float32).unsqueeze(0)
 
-                with torch.no_grad():
-                    outputs = model(input_tensor)
-                    probabilities = torch.softmax(outputs, dim=1)
-                    top_probs, top_classes = torch.topk(probabilities, k=5, dim=1)
-                    top_probs = top_probs[0].cpu().numpy()
-                    top_classes = top_classes[0].cpu().numpy()
+                    with torch.no_grad():
+                        outputs = model(input_tensor)
+                        probabilities = torch.softmax(outputs, dim=1)
+                        top_probs, top_classes = torch.topk(probabilities, k=5, dim=1)
+                        top_probs = top_probs[0].cpu().numpy()
+                        top_classes = top_classes[0].cpu().numpy()
 
-                    top_predictions = [
-                        (class_mapping.get(cls, "Unknown"), prob)
-                        for cls, prob in zip(top_classes, top_probs)
-                    ]
+                        top_predictions = [
+                            (class_mapping.get(cls, "Unknown"), prob)
+                            for cls, prob in zip(top_classes, top_probs)
+                        ]
+
+                        # Print the top predictions
+                        top_label = top_predictions[0][0]
+
+                        if is_recording:
+                            gesture_sentence += top_label + " "  
+
+                    word_count += 1
 
                     # Print the top predictions
-                    top_label = top_predictions[0][0]
-
-                    if is_recording:
-                        gesture_sentence += top_label + " "  
-
-                word_count += 1
-
-                # Print the top predictions
-                print("Top Predictions:")
-                for label, confidence in top_predictions:
-                    print(f"{label}: {confidence:.2f}")
-                
-                print(f"Word: {word_count}")
-                print("")
+                    print("Top Predictions:")
+                    for label, confidence in top_predictions:
+                        print(f"{label}: {confidence:.2f}")
+                    
+                    print(f"Word: {word_count}")
+                    print("")
+                else:
+                    print("Not enough frames to perform prediction.")
             else:
-                print("Not enough frames to perform prediction.")
-        else:
-            print("No significant movement detected. Skipping prediction.")
+                print("No significant movement detected. Skipping prediction.")
 
-        frame_buffer.clear()
-        start_time = time.time()
+            frame_buffer.clear()
+            start_time = time.time()
 
-    # Display current detection state
-    state_text = "Capturing" if is_detecting else "Idle"
-    cv2.putText(
-        frame,
-        f"State: {state_text}",
-        (10, 50),
-        cv2.FONT_HERSHEY_SIMPLEX,
-        1,
-        (0, 255, 0) if is_detecting else (0, 0, 255),
-        2,
-        cv2.LINE_AA,
-    )
-    remaining_time = max(0, sampling_duration - elapsed_time)
-    timer_text = f"Timer: {remaining_time:.1f}s"
-    
-    cv2.putText(
-        frame,
-        timer_text,
-        (10, 100),  # Display below the state text
-        cv2.FONT_HERSHEY_SIMPLEX,
-        1,
-        (0, 255, 0),  # White color for the timer text
-        2,
-        cv2.LINE_AA,
-    )
+        # Display current detection state
+        state_text = "Capturing" if is_detecting else "Idle"
+        cv2.putText(
+            frame,
+            f"State: {state_text}",
+            (10, 50),
+            cv2.FONT_HERSHEY_SIMPLEX,
+            1,
+            (0, 255, 0) if is_detecting else (0, 0, 255),
+            2,
+            cv2.LINE_AA,
+        )
+        remaining_time = max(0, sampling_duration - elapsed_time)
+        timer_text = f"Timer: {remaining_time:.1f}s"
+        
+        cv2.putText(
+            frame,
+            timer_text,
+            (10, 100),  # Display below the state text
+            cv2.FONT_HERSHEY_SIMPLEX,
+            1,
+            (0, 255, 0),  # White color for the timer text
+            2,
+            cv2.LINE_AA,
+        )
 
-    # Display word count
-    word_count_text = f"Detected Words: {word_count}"
-    cv2.putText(
-        frame,
-        word_count_text,
-        (10, 150),  # Position below the timer
-        cv2.FONT_HERSHEY_SIMPLEX,
-        1,
-        (0, 0, 0),  # White color for text
-        2,
-        cv2.LINE_AA,
-    )
+        # Display word count
+        word_count_text = f"Detected Words: {word_count}"
+        cv2.putText(
+            frame,
+            word_count_text,
+            (10, 150),  # Position below the timer
+            cv2.FONT_HERSHEY_SIMPLEX,
+            1,
+            (0, 0, 0),  # White color for text
+            2,
+            cv2.LINE_AA,
+        )
 
-    # Display the frame
-    cv2.imshow("Webcam Feed", frame)
+        # Display the frame
+        cv2.imshow("Webcam Feed", frame)
 
-    with open("ASL_to_Text.txt", "w") as file:
-        file.write(gesture_sentence.strip())  # Strip trailing space
-    # Handle key presses
-    key = cv2.waitKey(1) & 0xFF
-    if key == ord('q'):  # Quit
-        break
-    elif key == ord(' '):  # Toggle start/stop
-        is_detecting = not is_detecting
-        is_recording = not is_recording
-    elif key == ord('r'):
-        gesture_sentence = ""
+        with open("asl_recognition/ASL_to_Text.txt", "w") as file:
+            file.write(gesture_sentence.strip())  # Strip trailing space
+        # Handle key presses
+        key = cv2.waitKey(1) & 0xFF
+        if key == ord('q'):  # Quit
+            break
+        elif key == ord(' '):  # Toggle start/stop
+            is_detecting = not is_detecting
+            is_recording = not is_recording
+        elif key == ord('r'):
+            gesture_sentence = ""
 
 
-cap.release()
-cv2.destroyAllWindows()
+    cap.release()
+    cv2.destroyAllWindows()
+
+if __name__ == "__main__":
+    main()
