@@ -23,6 +23,10 @@ class_mapping = load_mapping("models/wlasl_class_list.txt")
 mp_holistic = mp.solutions.holistic
 holistic = mp_holistic.Holistic(min_detection_confidence=0.7, min_tracking_confidence=0.7)
 
+# String to accumulate recognized gesture names
+gesture_sentence = ""
+
+is_recording = False
 
 # Keypoint mapping and skeleton for visualization
 keypoint_map = {
@@ -226,6 +230,12 @@ while cap.isOpened():
                         for cls, prob in zip(top_classes, top_probs)
                     ]
 
+                    # Print the top predictions
+                    top_label = top_predictions[0][0]
+
+                    if is_recording:
+                        gesture_sentence += top_label + " "  
+
                 word_count += 1
 
                 # Print the top predictions
@@ -285,12 +295,18 @@ while cap.isOpened():
     # Display the frame
     cv2.imshow("Webcam Feed", frame)
 
+    with open("ASL_to_Text.txt", "w") as file:
+        file.write(gesture_sentence.strip())  # Strip trailing space
     # Handle key presses
     key = cv2.waitKey(1) & 0xFF
     if key == ord('q'):  # Quit
         break
     elif key == ord(' '):  # Toggle start/stop
         is_detecting = not is_detecting
+        is_recording = not is_recording
+    elif key == ord('r'):
+        gesture_sentence = ""
+
 
 cap.release()
 cv2.destroyAllWindows()
