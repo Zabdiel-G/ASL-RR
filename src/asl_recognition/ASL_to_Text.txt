@@ -1,0 +1,1 @@
+actor describe champion champion reveal

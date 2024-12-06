@@ -27,40 +27,86 @@ def simplify_to_asl_grammar(text):
     
     return text
 
-def generate_asl_response(input_text):
-    """
-    Generates a response using FLAN-T5 and simplifies it to basic ASL grammar.
-    """    
-    if input_text.strip().endswith(("what", "where", "how","?")):
-        response_type = "Answer briefly in ASL grammar."
-    else:
-        response_type = "Continue the conversation naturally in ASL grammar. Respond briefly using essential words only."
-    
-    # Define the prompt for FLAN-T5
+def generate_english_response(input_text):
     prompt = (
-        "{response_type}\n\n"
-        "Examples:\n"
-        "Input: 'Your name what?'\nResponse: 'My name flan.'\n\n"
-        "Input: 'You help me, this?'\nResponse: 'Yes, help you.'\n\n"
-        f"Input: '{input_text}'\nResponse:"
+        "You are given the following words or phrases. Your task is to incorporate them into a coherent, meaningful English sentence. "
+        "If some words do not fit naturally, feel free to adjust their form slightly but keep their essence. "
+        "Focus on creating a sentence that makes sense and conveys a clear idea.\n\n"
+        f"Words: {input_text}\n\n"
+        "Sentence:"
     )
-    # Tokenize the prompt
     inputs = tokenizer(prompt, return_tensors="pt", padding=True, truncation=True)
+    outputs = model.generate(inputs["input_ids"], max_new_tokens=20, temperature=0.7, top_p=0.9, do_sample=True)
+    english_response = tokenizer.decode(outputs[0], skip_special_tokens=True).strip()
+    return english_response
+
+def generate_asl_response(english_text):
+    """
+    Takes an English response and uses a second prompt to rewrite it into a more ASL-like structure,
+    then optionally applies simplification rules.
+    """
+    # Prompt the model to convert the English text into an ASL-like structure
+    prompt = (
+        "Rewrite the following English sentence into a simplified ASL-like structure. "
+        "Remove auxiliary verbs, pronouns, and unnecessary words. Focus on key words and essential meaning.\n\n"
+        f"English: {english_text}\nASL-like Response:"
+    )
     
-    # Generate the response
+    # Tokenize and generate using the model
+    inputs = tokenizer(prompt, return_tensors="pt", padding=True, truncation=True)
     outputs = model.generate(
         inputs["input_ids"],
-        max_new_tokens=20,  # Limit to keep response concise
-        temperature=0.4,  # Lower for more straightforward responses
+        max_new_tokens=20,
+        temperature=0.4,
         top_p=0.9,
         do_sample=True,
     )
     
-    # Decode and simplify the response
-    asl_response = tokenizer.decode(outputs[0], skip_special_tokens=True).strip()
-    simplified_response = simplify_to_asl_grammar(asl_response)
+    # Decode the model's response
+    asl_like_response = tokenizer.decode(outputs[0], skip_special_tokens=True).strip()
     
-    return asl_response
+    # Optionally, run the simplification function again if you want additional refinement
+    simplified_response = simplify_to_asl_grammar(asl_like_response)
+    
+    return simplified_response
+
+
+# def generate_asl_response(input_text):
+#     """
+#     Generates a response using FLAN-T5 and simplifies it to basic ASL grammar.
+#     """    
+#     if input_text.strip().endswith(("what", "where", "how","?")):
+#         response_type = "Answer briefly in ASL grammar."
+#     else:
+#         response_type = "Continue the conversation naturally in ASL grammar. Respond briefly using essential words only."
+    
+#     # Define the prompt for FLAN-T5
+#     prompt = (
+#         "{response_type}\n\n"
+#         "Examples:\n"
+#         "Input: 'Your name what?'\nResponse: 'My name flan.'\n\n"
+#         "Input: 'You help me, this?'\nResponse: 'Yes, help you.'\n\n"
+#         f"Input: '{input_text}'\nResponse:"
+#     )
+#     # Tokenize the prompt
+#     inputs = tokenizer(prompt, return_tensors="pt", padding=True, truncation=True)
+    
+#     # Generate the response
+#     outputs = model.generate(
+#         inputs["input_ids"],
+#         max_new_tokens=20,  # Limit to keep response concise
+#         temperature=0.4,  # Lower for more straightforward responses
+#         top_p=0.9,
+#         do_sample=True,
+#     )
+    
+#     # Decode and simplify the response
+#     asl_response = tokenizer.decode(outputs[0], skip_special_tokens=True).strip()
+#     simplified_response = simplify_to_asl_grammar(asl_response)
+    
+#     print("Pre-simplified response:", asl_response)
+#     print("Post-simplified response:", simplified_response)
+#     return simplified_response
 
 def main():
     # File path for input
@@ -74,9 +120,19 @@ def main():
         print("Processing inputs from file:")
         for text in inputs:
             text = text.strip()
+            # if text:  # Skip empty lines
+            #     print(f"\nInput: {text}")
+            #     print("ASL-Structured Response:", generate_asl_response(text))
             if text:  # Skip empty lines
                 print(f"\nInput: {text}")
-                print("ASL-Structured Response:", generate_asl_response(text))
+                
+                # First, generate the English response
+                english_resp = generate_english_response(text)
+                print("Pre-simplified (English) response:", english_resp)
+                
+                # Then convert that English response to ASL grammar
+                asl_resp = generate_asl_response(english_resp)
+                print("Post-simplified (ASL) response:", asl_resp)
     else:
         print(f"File not found: {file_path}")
 
