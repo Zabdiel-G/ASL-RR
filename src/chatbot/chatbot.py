@@ -28,15 +28,30 @@ def simplify_to_asl_grammar(text):
     return text
 
 def generate_english_response(input_text):
+    
     prompt = (
-        "You are given the following words or phrases. Your task is to incorporate them into a coherent, meaningful English sentence. "
-        "If some words do not fit naturally, feel free to adjust their form slightly but keep their essence. "
-        "Focus on creating a sentence that makes sense and conveys a clear idea.\n\n"
-        f"Words: {input_text}\n\n"
-        "Sentence:"
+        "You are given words or phrases that represent a sentence or question in ASL grammar. "
+        "First, rewrite it into a complete, meaningful English sentence or question. "
+        "Maintain the essence of the input while improving readability and clarity. "
+        "Then respond to it with a relevant and meaningful answer. "
+        "Focus on creating responses that make sense in English.\n\n"
+        "Example 1:\n"
+        "ASL Input: 'actor reveal describe reveal'\n"
+        "English: 'What did the actor reveal?'\n"
+        "Response: 'The actor revealed a hidden truth and described it in detail.'\n\n"
+        "Example 2:\n"
+        "ASL Input: 'help support assist provide'\n"
+        "English: 'How can we help or support you?'\n"
+        "Response: 'We can provide assistance in various ways, depending on your needs.'\n\n"
+        "Example 3:\n"
+        "ASL Input: 'describe how wind smell'\n"
+        "English: 'Can you describe how the wind smells?'\n"
+        "Response: 'The wind smells fresh, with hints of pine and sea salt.'\n\n"
+        f"ASL Input: {input_text}\n"
+        "English:"
     )
     inputs = tokenizer(prompt, return_tensors="pt", padding=True, truncation=True)
-    outputs = model.generate(inputs["input_ids"], max_new_tokens=20, temperature=0.7, top_p=0.9, do_sample=True)
+    outputs = model.generate(inputs["input_ids"], max_new_tokens=50, temperature=0.7, top_p=0.9, do_sample=True)
     english_response = tokenizer.decode(outputs[0], skip_special_tokens=True).strip()
     return english_response
 
@@ -46,10 +61,22 @@ def generate_asl_response(english_text):
     then optionally applies simplification rules.
     """
     # Prompt the model to convert the English text into an ASL-like structure
+    # prompt = (
+    #     "Rewrite the following English sentence into a simplified ASL-like structure. "
+    #     "Remove auxiliary verbs, pronouns, and unnecessary words. Focus on key words and essential meaning.\n\n"
+    #     f"English: {english_text}\nASL-like Response:"
+    # )
     prompt = (
-        "Rewrite the following English sentence into a simplified ASL-like structure. "
-        "Remove auxiliary verbs, pronouns, and unnecessary words. Focus on key words and essential meaning.\n\n"
-        f"English: {english_text}\nASL-like Response:"
+        "Convert the following English sentence into a simplified ASL-like structure. "
+        "Omit auxiliary verbs, pronouns, and unnecessary words. Focus on key concepts and keep the response brief.\n\n"
+        "Example 1:\n"
+        "English: 'The actor revealed something important and described it.'\n"
+        "ASL: 'Actor reveal important describe.'\n\n"
+        "Example 2:\n"
+        "English: 'Can you help me with this task?'\n"
+        "ASL: 'You help me task?'\n\n"
+        f"English: {english_text}\n"
+        "ASL:"
     )
     
     # Tokenize and generate using the model
@@ -70,54 +97,18 @@ def generate_asl_response(english_text):
     
     return simplified_response
 
-
-# def generate_asl_response(input_text):
-#     """
-#     Generates a response using FLAN-T5 and simplifies it to basic ASL grammar.
-#     """    
-#     if input_text.strip().endswith(("what", "where", "how","?")):
-#         response_type = "Answer briefly in ASL grammar."
-#     else:
-#         response_type = "Continue the conversation naturally in ASL grammar. Respond briefly using essential words only."
-    
-#     # Define the prompt for FLAN-T5
-#     prompt = (
-#         "{response_type}\n\n"
-#         "Examples:\n"
-#         "Input: 'Your name what?'\nResponse: 'My name flan.'\n\n"
-#         "Input: 'You help me, this?'\nResponse: 'Yes, help you.'\n\n"
-#         f"Input: '{input_text}'\nResponse:"
-#     )
-#     # Tokenize the prompt
-#     inputs = tokenizer(prompt, return_tensors="pt", padding=True, truncation=True)
-    
-#     # Generate the response
-#     outputs = model.generate(
-#         inputs["input_ids"],
-#         max_new_tokens=20,  # Limit to keep response concise
-#         temperature=0.4,  # Lower for more straightforward responses
-#         top_p=0.9,
-#         do_sample=True,
-#     )
-    
-#     # Decode and simplify the response
-#     asl_response = tokenizer.decode(outputs[0], skip_special_tokens=True).strip()
-#     simplified_response = simplify_to_asl_grammar(asl_response)
-    
-#     print("Pre-simplified response:", asl_response)
-#     print("Post-simplified response:", simplified_response)
-#     return simplified_response
-
 def main():
     # File path for input
-    file_path = "asl_recognition/ASL_to_Text.txt"
+    input_file_path = "asl_recognition/ASL_to_Text.txt"
+    output_file_path = "chatbot/Text_to_ASL.txt"
 
     # Check if file exists
-    if os.path.exists(file_path):
-        with open(file_path, 'r', encoding='utf-8') as file:
+    if os.path.exists(input_file_path):
+        with open(input_file_path, 'r', encoding='utf-8') as file:
             inputs = file.readlines()
         
         print("Processing inputs from file:")
+        outputs = [] # Stores the results for the output file
         for text in inputs:
             text = text.strip()
             # if text:  # Skip empty lines
@@ -133,9 +124,16 @@ def main():
                 # Then convert that English response to ASL grammar
                 asl_resp = generate_asl_response(english_resp)
                 print("Post-simplified (ASL) response:", asl_resp)
+
+                # Append results to output list
+                outputs.append(f"Input: {text}\nEnglish: {english_resp}\nASL: {asl_resp}\n")
+            
+        # Write the outputs to the output file
+        with open(output_file_path, 'w', encoding='utf-8') as output_file:
+            output_file.write("\n".join(outputs))
+        print(f"\nResults written to: {output_file_path}")
     else:
-        print(f"File not found: {file_path}")
+        print(f"File not found: {input_file_path}")
 
 if __name__ == "__main__":
     main()
-
