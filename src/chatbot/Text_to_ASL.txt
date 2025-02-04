@@ -1,3 +1,4 @@
-Input: father leave child bring brother phone write
-English: How can you write to your child?
-ASL: How write to your child?
+Input: how fix computer broken
+English Input: How can I fix a broken computer?
+English Response: I would suggest using a tool called a pcb, or something like that.
+ASL: suggest using a tool called a pcb, or something like that.
