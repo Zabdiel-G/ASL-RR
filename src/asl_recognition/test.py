@@ -4,8 +4,8 @@ import os
 import numpy as np
 import torch
 from collections import deque
-from models.TGCN.tgcn_model import GCN_muti_att  # Import your model class
-from asl_utils import preprocess_frames, compute_difference, close_mediapipe, load_mapping, keypoint_map, skeleton
+from asl_recognition.models.TGCN.tgcn_model import GCN_muti_att  # Import your model class
+from asl_recognition.asl_utils import preprocess_frames, compute_difference, close_mediapipe, load_mapping, keypoint_map, skeleton
 import time
 import random
 
@@ -14,15 +14,14 @@ import random
 num_samples = 50 # Ensure this matches the input expected by your model
 input_feature = num_samples * 2
 model = GCN_muti_att(input_feature=input_feature, hidden_feature=256, num_class=2000, p_dropout=0.3, num_stage=24)
-model_path = os.path.join("models", "archived_TCGN", "asl2000", "ckpt.pth")
+model_path = os.path.join("asl_recognition", "models", "archived_TCGN", "asl2000", "ckpt.pth")
 model.load_state_dict(torch.load(model_path, map_location=torch.device('cpu')))
 model.eval()
-class_mapping = load_mapping("models/wlasl_class_list.txt")
+class_mapping = load_mapping("asl_recognition/models/wlasl_class_list.txt")
 
 # Initialize MediaPipe Holistic
 mp_holistic = mp.solutions.holistic
 holistic = mp_holistic.Holistic(min_detection_confidence=0.7, min_tracking_confidence=0.7)
-
 
 # Keypoint mapping and skeleton for visualization
 keypoint_map = {
@@ -186,84 +185,6 @@ while cap.isOpened():
         # Check if the maximum movement exceeds the threshold
         return np.any(movement > threshold)
 
-<<<<<<< Updated upstream
-    # Convert the frame to RGB (required by MediaPipe)
-    image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-
-    # Process the frame with MediaPipe
-    result = holistic.process(image)
-
-    # Preprocess the frame to extract keypoints
-    _, keypoints = preprocess_frames(result)
-    frame_buffer.append(keypoints)
-
-    # Check if enough time has passed to sample frames
-    elapsed_time = time.time() - start_time
-    if elapsed_time >= sampling_duration:
-        # Check for significant movement
-        if significant_movement(frame_buffer, threshold=0.01):
-            # Ensure at least 50 frames are available
-            if len(frame_buffer) >= 50:
-                # Randomly sample 50 frames from the buffer
-                sampled_frames = random.sample(list(frame_buffer), 50)
-
-                # Create input for the model (55 keypoints × 100 values)
-                input_data = np.stack(sampled_frames).T  # Transpose to shape [keypoints, frames * 2]
-                input_data = input_data.reshape(55, 100)  # Reshape to (55, 100)
-
-                # Convert to a PyTorch tensor
-                input_tensor = torch.tensor(input_data, dtype=torch.float32).unsqueeze(0)  # Add batch dimension
-
-                # Perform prediction
-                with torch.no_grad():
-                    outputs = model(input_tensor)  # Forward pass
-                    probabilities = torch.softmax(outputs, dim=1)  # Apply softmax to get probabilities
-
-                    # Get top 3 predictions and their confidence scores
-                    top_probs, top_classes = torch.topk(probabilities, k=3, dim=1)
-                    top_probs = top_probs[0].cpu().numpy()  # Convert to numpy array
-                    top_classes = top_classes[0].cpu().numpy()  # Convert to numpy array
-
-                    # Map classes to labels
-                    top_predictions = [
-                        (class_mapping.get(cls, "Unknown"), prob) 
-                        for cls, prob in zip(top_classes, top_probs)
-                    ]
-
-                # Print the top 3 predictions with their confidence scores
-                    print("Top 3 Predictions:")
-                    for label, confidence in top_predictions:
-                        print(f"{label}: {confidence:.2f}")
-
-                    # confidence = probabilities[0, predicted_class].item()  # Get confidence of the prediction
-
-                    # # Define a confidence threshold
-                    # CONFIDENCE_THRESHOLD = 0.5
-                    # if confidence >= CONFIDENCE_THRESHOLD:
-                    #     predicted_label = class_mapping.get(predicted_class, "Unknown")
-                    # else:
-                    #     predicted_label = "Unknown"
-
-                    # Print the prediction and confidence
-                    # print(f"Predicted Gesture: {predicted_label}, Confidence: {confidence:.2f}")
-
-        else:
-            print("No significant movement detected. Skipping prediction.")
-
-        # Reset buffer and timer for the next round
-        frame_buffer.clear()
-        start_time = time.time()
-
-
-
-    # Display the frame
-    cv2.imshow("Webcam Feed", frame)
-    if cv2.waitKey(1) & 0xFF == ord('q'):
-        break
-
-cap.release()
-cv2.destroyAllWindows()
-=======
 def recognize_sign(frame, frame_buffer, gesture_sentence, word_count, is_recording, is_detecting, start_time):
     """
     Recognizes the ASL gesture from the given frame using a pretrained TGCN model.
@@ -552,4 +473,3 @@ def recognize_sign(frame, frame_buffer, gesture_sentence, word_count, is_recordi
 
 # if __name__ == "__main__":
 #     main()
->>>>>>> Stashed changes
