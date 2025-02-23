@@ -1,12 +1,14 @@
 from flask import Flask, render_template, jsonify, Response
 import cv2
 import time
-from asl_recognition.test import recognize_sign  # Import the updated function
+import threading
+import asl_recognition.test   # Import the updated function
 
 app = Flask(__name__)
 
 # Initialize the webcam
 cap = cv2.VideoCapture(0)
+lock = threading.Lock()  # Ensures thread safety
 
 # Global variables for gesture recognition
 frame_buffer = []
@@ -15,6 +17,7 @@ word_count = 0
 is_recording = False
 is_detecting = False
 start_time = time.time()
+frame = None
 
 def gen_frames():
     global frame, frame_buffer, gesture_sentence, word_count, is_recording, is_detecting, start_time
@@ -23,18 +26,16 @@ def gen_frames():
         if not ret:
             break
 
-        # Call the recognize_sign function
-        result = recognize_sign(frame, frame_buffer, gesture_sentence, word_count, is_recording, is_detecting, start_time)
+        with lock:
+            result = asl_recognition.test.recognize_sign(frame, frame_buffer, gesture_sentence, word_count, is_recording, is_detecting, start_time)
+            gesture_sentence = result['gesture_sentence']
+            word_count = result['word_count']
+            frame = result['frame']
 
-        # Get the processed frame
-        frame = result['frame']
-
-        # Encode the frame to send to the frontend (as JPEG)
         _, buffer = cv2.imencode('.jpg', frame)
-        frame = buffer.tobytes()
-
+        frame_bytes = buffer.tobytes()
         yield (b'--frame\r\n'
-               b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
+               b'Content-Type: image/jpeg\r\n\r\n' + frame_bytes + b'\r\n\r\n')
 
 @app.route('/')
 def index():
@@ -46,48 +47,52 @@ def video_feed():
 
 @app.route('/gesture_sentence')
 def get_gesture_sentence():
-    return jsonify({'gesture_sentence': gesture_sentence.strip()})
+    with lock:
+        return jsonify({'gesture_sentence': gesture_sentence.strip()})
 
 @app.route('/state_info')
 def get_state_info():
-    result = recognize_sign(frame, frame_buffer, gesture_sentence, word_count, is_recording, is_detecting, start_time)
-    return jsonify({
-        'state_text': result['state_text'],
-        'remaining_time': result['remaining_time'],
-        'word_count_text': result['word_count_text']
-    })
+    with lock:
+        if frame is None:
+            return jsonify({'error': 'No frame available'})
+        result = asl_recognition.test.recognize_sign(frame, frame_buffer, gesture_sentence, word_count, is_recording, is_detecting, start_time)
+        return jsonify({
+            'state_text': result['state_text'],
+            'remaining_time': result['remaining_time'],
+            'word_count_text': result['word_count_text']
+        })
 
 @app.route('/toggle_detection', methods=['POST'])
 def toggle_detection():
     global is_recording, is_detecting
-    # Toggle start/stop detection
-    is_detecting = not is_detecting
-    is_recording = not is_recording
-    return jsonify({
-        'is_detecting': is_detecting,
-        'is_recording': is_recording
-    })
+    with lock:
+        is_detecting = not is_detecting
+        is_recording = not is_recording
+    return jsonify({'is_detecting': is_detecting, 'is_recording': is_recording})
 
 @app.route('/reset_gesture', methods=['POST'])
 def reset_gesture():
     global gesture_sentence
-    # Reset the gesture sentence
-    gesture_sentence = ""
-    return jsonify({
-        'gesture_sentence': gesture_sentence
-    })
+    with lock:
+        gesture_sentence = ""
+    return jsonify({'gesture_sentence': gesture_sentence})
 
 @app.route('/get_frame_data')
 def get_frame_data():
-    # Assume you capture a frame here (camera logic)
-    frame = "dummy_frame_data"  # Replace with actual frame capture logic
+    with lock:
+        return jsonify({
+            'frame': "Available" if frame is not None else "No frame",
+            'gesture_sentence': gesture_sentence,
+            'state_text': "Capturing" if is_detecting else "Idle",
+            'word_count_text': f"Detected Words: {word_count}"
+        })
 
-    return jsonify({
-        'frame': frame,
-        'gesture_sentence': gesture_sentence,
-        'state_text': "Capturing" if is_detecting else "Idle",
-        'word_count_text': f"Detected Words: 0"
-    })
+def release_camera():
+    cap.release()
+
+import atexit
+atexit.register(release_camera)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=True)
+

@@ -12,6 +12,8 @@ import random
 
 # Load the trained model
 num_samples = 50 # Ensure this matches the input expected by your model
+frames_to_extract = 50 
+sampling_duration = 4
 input_feature = num_samples * 2
 model = GCN_muti_att(input_feature=input_feature, hidden_feature=256, num_class=2000, p_dropout=0.3, num_stage=24)
 model_path = os.path.join("asl_recognition", "models", "archived_TCGN", "asl2000", "ckpt.pth")
@@ -64,17 +66,6 @@ def get_keypoints(landmarks, keypoint_map):
     return np.array(keypoints, dtype=np.float32).reshape(-1, 2)
 
 def normalize_keypoints(keypoints, image_width, image_height):
-    """
-    Normalizes keypoints from pixel space to the range [-1, 1].
-    
-    Parameters:
-        keypoints: NumPy array of shape (N, 2) with normalized keypoints.
-        image_width: Width of the image.
-        image_height: Height of the image.
-
-    Returns:
-        Normalized keypoints in the range [-1, 1].
-    """
     keypoints[:, 0] = 2 * ((keypoints[:, 0] * image_width) / image_width - 0.5)  # Normalize x
     keypoints[:, 1] = 2 * ((keypoints[:, 1] * image_height) / image_height - 0.5)  # Normalize y
     return keypoints
@@ -90,8 +81,6 @@ def preprocess_frames(results):
         points = {}
         keypoints = []
 
-        # Process pose landmarks
-        # Process pose landmarks
         if results.pose_landmarks:
             landmarks = results.pose_landmarks.landmark
 
@@ -101,7 +90,6 @@ def preprocess_frames(results):
             mid_hip_x = (landmarks[23].x + landmarks[24].x) / 2
             mid_hip_y = (landmarks[23].y + landmarks[24].y) / 2
 
-            # Extract pose keypoints using keypoint_map
             pose_keypoints = get_keypoints(landmarks, keypoint_map)
 
             # Add neck and mid-hip to the pose keypoints
@@ -119,7 +107,7 @@ def preprocess_frames(results):
                 points[idx] = (int(x), int(y))
 
             keypoints.append(pose_keypoints)
-            # print(pose_keypoints)
+            #print("pose landmarks")
         else:
             # Pad with zeros if pose landmarks are missing
             keypoints.append(np.zeros((13, 2), dtype=np.float32))
@@ -129,7 +117,7 @@ def preprocess_frames(results):
             left_hand_keypoints = np.array([[lm.x, lm.y] for lm in results.left_hand_landmarks.landmark], dtype=np.float32)
             left_hand_keypoints = normalize_keypoints(left_hand_keypoints, image_width=256, image_height=256)
             keypoints.append(left_hand_keypoints)
-            #print(left_hand_keypoints)
+            #print("left hand landmarks")
 
         else:
             keypoints.append(np.zeros((21, 2), dtype=np.float32))        
@@ -139,6 +127,7 @@ def preprocess_frames(results):
             right_hand_keypoints = np.array([[lm.x, lm.y] for lm in results.right_hand_landmarks.landmark], dtype=np.float32)
             right_hand_keypoints = normalize_keypoints(right_hand_keypoints, image_width=256, image_height=256)  # Apply normalization
             keypoints.append(right_hand_keypoints)
+            #print("right hand landmarks")
         else:
             keypoints.append(np.zeros((21, 2), dtype=np.float32))
             
@@ -148,49 +137,20 @@ def preprocess_frames(results):
     except Exception as e:
         print(f"Failed to preprocess frame: {str(e)}")
         return {}, None
-
-# Parameters
-cap = cv2.VideoCapture(0)
-cap.set(cv2.CAP_PROP_FRAME_WIDTH, 256)
-cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 256)
-
-num_frames = 50  # Number of frames required for the model
-num_keypoints = 55  # Number of keypoints expected by the model
-frame_rate = 10  # Frames per second to sample
-sampling_duration = 5 # Duration to collect frames (in seconds)
-frame_buffer = deque(maxlen=frame_rate * sampling_duration) 
-
-
-
-start_time = time.time()
-
-while cap.isOpened():
-    ret, frame = cap.read()
-    if not ret:
-        break
     
     
-    
-    
-    # Convert the frame to RGB (required by MediaPipe)
-# Convert the frame to RGB (required by MediaPipe)
-# Define a function to detect significant movement
-    def significant_movement(frame_buffer, threshold=0.01):
-        if len(frame_buffer) < 2:
-            return False  # Not enough frames to detect movement
+def significant_movement(frame_buffer, threshold=0.01):
+    if len(frame_buffer) < 2:
+        return False 
         
-        # Calculate the difference between consecutive keypoints
-        movement = np.abs(np.diff(frame_buffer, axis=0))
-        
-        # Check if the maximum movement exceeds the threshold
-        return np.any(movement > threshold)
+    movement = np.abs(np.diff(frame_buffer, axis=0))
+    return np.any(movement > threshold)
+
 
 def recognize_sign(frame, frame_buffer, gesture_sentence, word_count, is_recording, is_detecting, start_time):
     """
     Recognizes the ASL gesture from the given frame using a pretrained TGCN model.
     """
-    sampling_duration = 4
-    frames_to_extract = 50  # Number of frames to sample
 
     # image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
     image = frame.copy()
