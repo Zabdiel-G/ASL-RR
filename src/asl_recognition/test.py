@@ -144,115 +144,92 @@ def significant_movement(frame_buffer, threshold=0.01):
         return False 
         
     movement = np.abs(np.diff(frame_buffer, axis=0))
+    print("Movement differences:", movement)  # Log movement differences
     return np.any(movement > threshold)
 
 
 def recognize_sign(frame, frame_buffer, gesture_sentence, word_count, is_recording, is_detecting, start_time):
     """
-    Recognizes the ASL gesture from the given frame using a pretrained TGCN model.
+    Processes one frame, updates the frame buffer, and performs inference if conditions are met.
+    Returns a dictionary for frontend integration.
     """
-
-    # image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+    # Process the frame with MediaPipe
     image = frame.copy()
     image.flags.writeable = False
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-
-    # Process the frame with MediaPipe
     result = holistic.process(image)
-
-    # Preprocess the frame to extract keypoints
+    
+    # Preprocess the frame and update the buffer
     _, keypoints = preprocess_frames(result)
-    frame_buffer.append(keypoints)
-
-    if result.pose_landmarks:
-        landmarks = result.pose_landmarks.landmark
-
-        # Estimate Neck and Mid Hip
-        neck_x = (landmarks[11].x + landmarks[12].x) / 2
-        neck_y = (landmarks[11].y + landmarks[12].y) / 2
-        mid_hip_x = (landmarks[23].x + landmarks[24].x) / 2
-        mid_hip_y = (landmarks[23].y + landmarks[24].y) / 2
-
-        # Add estimated points to the keypoint_map
-        points = {1: (int(neck_x * frame.shape[1]), int(neck_y * frame.shape[0])),
-                8: (int(mid_hip_x * frame.shape[1]), int(mid_hip_y * frame.shape[0]))}
-
-        # Draw keypoints based on mapping and estimated points on the frame
-        for mp_index, op_index in keypoint_map.items():
-            points[op_index] = (int(landmarks[mp_index].x * frame.shape[1]), int(landmarks[mp_index].y * frame.shape[0]))
-
-        # Draw keypoints
-        for point in points.values():
-            cv2.circle(frame, point, 5, (255, 0, 0), -1)
-
-        # Draw skeleton
-        for start, end in skeleton:
-            if start in points and end in points:
-                cv2.line(frame, points[start], points[end], (255, 0, 255), 2)
-
+    if keypoints is not None:
+        frame_buffer.append(keypoints)
+    
+    # Compute elapsed time
     elapsed_time = time.time() - start_time
-
+    
+    # Prepare common return variables
+    state_text = "Capturing" if is_detecting else "Idle"
+    remaining_time = max(0, sampling_duration - elapsed_time)
+    word_count_text = f"Detected Words: {word_count}"
+    
+    # Check if we should perform prediction
     if is_detecting and elapsed_time >= sampling_duration:
-        if significant_movement(frame_buffer, threshold=0.01):
-            print(f"Current frame buffer length: {len(frame_buffer)}")
-            if len(frame_buffer) >= frames_to_extract:
+        # Proceed only if we have enough frames
+        if len(frame_buffer) >= frames_to_extract:
+            if significant_movement(frame_buffer, threshold=0.01):
+                print(f"Current frame buffer length: {len(frame_buffer)}")
+                # Sample frames and prepare model input
                 sampled_frames = random.sample(list(frame_buffer), frames_to_extract)
-
                 input_data = np.stack(sampled_frames).T
                 input_data = input_data.reshape(55, 100)
                 input_tensor = torch.tensor(input_data, dtype=torch.float32).unsqueeze(0)
-
+                
+                # Run inference
                 with torch.no_grad():
                     outputs = model(input_tensor)
                     probabilities = torch.softmax(outputs, dim=1)
                     top_probs, top_classes = torch.topk(probabilities, k=5, dim=1)
                     top_probs = top_probs[0].cpu().numpy()
                     top_classes = top_classes[0].cpu().numpy()
-
+                    
                     top_predictions = [
                         (class_mapping.get(cls, "Unknown"), prob)
                         for cls, prob in zip(top_classes, top_probs)
                     ]
-
-                    # Print the top predictions
+                    
                     top_label = top_predictions[0][0]
-
                     if is_recording:
-                        gesture_sentence += top_label + " "  
-
+                        gesture_sentence += top_label + " "
+                
                 word_count += 1
-
-                # Print the top predictions
+                
                 print("Top Predictions:")
                 for label, confidence in top_predictions:
                     print(f"{label}: {confidence:.2f}")
+                print(f"Word: {word_count}\n")
                 
-                print(f"Word: {word_count}")
-                print("")
+                # Clear the buffer and reset the timer after a prediction
+                frame_buffer.clear()
+                start_time = time.time()
             else:
-                print("Not enough frames to perform prediction.")
+                # Print the warning once if the buffer is exactly full
+                if len(frame_buffer) == frames_to_extract:
+                    print("No significant movement detected. Skipping prediction.")
+                # Keep accumulating frames until significant movement is detected.
         else:
-            print("No significant movement detected. Skipping prediction.")
+            # Optionally, you could log that the buffer isn't full yet:
+            # print(f"Buffer length ({len(frame_buffer)}) is less than required ({frames_to_extract}).")
+            pass
 
-        frame_buffer.clear()
-        start_time = time.time()
-
-    # Handle sending data to frontend (via Flask, SocketIO, etc.)
-    state_text = "Capturing" if is_detecting else "Idle"
-    remaining_time = max(0, sampling_duration - elapsed_time)
-    word_count_text = f"Detected Words: {word_count}"
-
-    # Send frame, state, remaining time, word count to frontend using Flask/Sockets
-
-    # Handle key presses (you can map this on frontend if needed)
+    # Handle key events if needed (this might be irrelevant in a web context)
     key = cv2.waitKey(1) & 0xFF
-    if key == ord(' '):  # Toggle start/stop
+    if key == ord(' '):  # Toggle detection state
         is_detecting = not is_detecting
         is_recording = not is_recording
     elif key == ord('r'):
         gesture_sentence = ""
-
-    # Returning values for backend/frontend integration
+    
+    # Return using your current structure
     return {
         'frame': frame,  # or process into base64 for frontend
         'gesture_sentence': gesture_sentence,
@@ -261,6 +238,7 @@ def recognize_sign(frame, frame_buffer, gesture_sentence, word_count, is_recordi
         'remaining_time': remaining_time,
         'word_count_text': word_count_text
     }
+
 
 
 
