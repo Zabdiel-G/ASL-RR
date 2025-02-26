@@ -83,3 +83,23 @@ def load_mapping(filepath = "models/wlasl_class_list.txt"):
             index, label = line.strip().split(maxsplit=1)
             class_mapping[int(index)] = label
     return class_mapping
+
+    # Function to get the last word from the log file
+def extract_last_word(log_file):
+    """
+    Reads the last word from the log file.
+    If the file is empty, returns None.
+    """
+    if not os.path.exists(log_file) or os.stat(log_file).st_size == 0:
+        return None  # Log file is empty, return None
+
+    with open(log_file, "r", encoding="utf-8") as f:
+        lines = f.readlines()
+    
+    if not lines:
+        return None  # No lines in file
+
+    last_line = lines[-1].strip()
+    words = last_line.split()
+
+    return words[-1] if words else None

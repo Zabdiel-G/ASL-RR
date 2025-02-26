@@ -10,9 +10,10 @@ import random
 from models.TGCN.tgcn_model import GCN_muti_att  # Import your model class
 from collections import deque
 from preprocessing import preprocess_frames, get_keypoints, normalize_keypoints
-from asl_utils import load_mapping, keypoint_map, significant_movement
+from asl_utils import load_mapping, keypoint_map, significant_movement, extract_last_word
 from gesture_recognition import make_prediction
 from asl_to_chatbot import buffer_predictions, log_full_sentence
+from predictive_texting import predict_next_word
 
 def process_video_stream(
     model,
@@ -21,7 +22,7 @@ def process_video_stream(
     frames_to_extract: int = 50,
     sampling_duration: int = 4,
     frame_rate: int = 100,
-    resolution_x: int = 720,
+    resolution_x: int = 720, 
     resolution_y: int = 720,
     movement_threshold: float = 0.01,
     log_file: str = "full_sentence.txt"
@@ -73,15 +74,25 @@ def process_video_stream(
                     try:
                         top_predictions = make_prediction(frame_buffer, model, class_mapping)
                         # Print the top predictions
+                        candidate_words_probs = [
+                            (label, confidence) for label, confidence in top_predictions
+                        ]
+                        extract_last_word = get_last_word_from_log(log_file)
+
                         print("Top Predictions:")
                         for label, confidence in top_predictions:
-                            print(f"{label}: {confidence:.2f}")
-
-                        # Process the predictions as needed
+                            print(f"{label}: {confidence:.2%}")
+                        if last_word is None:
+                            next_word = top_predictions[0][0]
+                        else:
+                            next_word = predict_next_word(last_word, candidate_words_probs)
+                        sentence_buffer.append(next_word)
                         sentence = buffer_predictions(top_predictions, sentence_buffer, end_token="STOP")
-                        if sentence:
+                        if "STOP" in sentence_buffer:
+                            sentence = " ".join(sentence_buffer[:-1]) 
                             print(f"Complete Sentence: {sentence}")
                             log_full_sentence(sentence, log_file)
+                            sentence_buffer.clear()
                     except ValueError as e:
                         print(e)
                 else:
