@@ -4,7 +4,10 @@ document.addEventListener("DOMContentLoaded", function() {
         fetch('/gesture_sentence')
             .then(response => response.json())
             .then(data => {
-                document.getElementById('gesture_sentence').textContent = data.gesture_sentence;
+                const gestureEl = document.getElementById('gesture_sentence');
+                gestureEl.textContent = data.gesture_sentence;
+                // Auto-scroll to the bottom so the latest words are visible
+                gestureEl.scrollTop = gestureEl.scrollHeight;
             });
     }, 1000);  // Update every second
 

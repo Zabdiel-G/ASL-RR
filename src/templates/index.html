@@ -45,6 +45,17 @@
       margin-top: 10px;
       font-size: 1.1em;
     }
+    /* Container for the gesture sentence that scales the text */
+    #gestureSentenceText {
+      width: 100%;
+      height: 100px;
+      border: 1px solid #ccc;
+      padding: 10px;
+      overflow-y: auto;  /* Allow vertical scrolling */
+      overflow-x: hidden;
+      font-size: 24px;   /* Use your desired base font size */
+      white-space: normal;
+    }
     .button-container {
       display: flex;
       flex-wrap: wrap;
@@ -87,8 +98,8 @@
       
       <div id="status">
         <span id="stateText">Idle</span><br>
-        <span id="wordCountText">Detected Words: 0</span><br>
-        <span id="gestureSentenceText">No gestures detected</span>
+        <!-- Gesture sentence displayed in a scalable box -->
+        <div id="gestureSentenceText">No gestures detected</div>
       </div>
 
       <div class="button-container">
@@ -102,6 +113,7 @@
   </div>
 
   <script>
+    // Toggle detection state on button click
     document.getElementById('toggleButton').addEventListener('click', () => {
       fetch('/toggle_detection', { method: 'POST' })
         .then(response => response.json())
@@ -112,15 +124,46 @@
         .catch(error => console.error('Error toggling detection:', error));
     });
 
+    // Reset gesture on button click
     document.getElementById('resetButton').addEventListener('click', () => {
       fetch('/reset_gesture', { method: 'POST' })
         .then(response => response.json())
         .then(data => {
           console.log(data);
-          document.getElementById('gestureSentenceText').innerText = data.gesture_sentence;
+          updateGestureSentence(data.gesture_sentence);
         })
         .catch(error => console.error('Error resetting gesture:', error));
     });
+
+    // Adjust the font size to make the text fit inside the container
+    function adjustFontSize() {
+      const container = document.getElementById('gestureSentenceText');
+      let fontSize = 24; // initial font size in pixels
+      container.style.fontSize = fontSize + 'px';
+      
+      // Reduce the font size until the text fits inside the container or until a minimum font size is reached
+      while (container.scrollWidth > container.clientWidth && fontSize > 12) {
+        fontSize -= 1;
+        container.style.fontSize = fontSize + 'px';
+      }
+    }
+
+    // Update the gesture sentence and adjust the font size
+    function updateGestureSentence(text) {
+      const container = document.getElementById('gestureSentenceText');
+      container.innerText = text || "No gestures detected";
+      adjustFontSize();
+    }
+
+    // Poll the gesture sentence endpoint every second to update the displayed sentence
+    setInterval(() => {
+      fetch('/gesture_sentence')
+        .then(response => response.json())
+        .then(data => {
+          updateGestureSentence(data.gesture_sentence);
+        })
+        .catch(error => console.error('Error fetching gesture sentence:', error));
+    }, 1000);
   </script>
 </body>
 </html>
