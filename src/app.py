@@ -3,8 +3,12 @@ import cv2
 import time
 import threading
 import asl_recognition.test   # Import the updated function
+import chatbot.chatbot
 
 app = Flask(__name__)
+from flask_cors import CORS
+CORS(app)
+
 
 # Initialize the webcam
 cap = cv2.VideoCapture(0)
@@ -44,6 +48,28 @@ def index():
 @app.route('/video_feed')
 def video_feed():
     return Response(gen_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
+
+@app.route('/chat_from_gesture', methods=['GET'])
+def chat_from_gesture():
+    global gesture_sentence
+    with lock:
+        current_gesture = gesture_sentence.strip()
+    
+    if not current_gesture:
+        return jsonify({"error": "No gesture sentence available."}), 400
+
+    # Process the gesture sentence using functions from your chatbot module
+    english_interpretation = chatbot.chatbot.interpret_asl_input(current_gesture)
+    english_response = chatbot.chatbot.generate_english_response(english_interpretation)
+    asl_response = chatbot.chatbot.generate_asl_response(english_response)
+
+    return jsonify({
+        "gesture_sentence": current_gesture,
+        "english_interpretation": english_interpretation,
+        "english_response": english_response,
+        "asl_response": asl_response
+    })
+
 
 @app.route('/gesture_sentence')
 def get_gesture_sentence():
