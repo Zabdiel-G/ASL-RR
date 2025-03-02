@@ -94,8 +94,8 @@ def toggle_detection():
     with lock:
         is_detecting = not is_detecting
         is_recording = not is_recording
-        print("Toggle Detection Called: is_detecting =", is_detecting, "is_recording =", is_recording)
     return jsonify({'is_detecting': is_detecting, 'is_recording': is_recording})
+
 
 
 @app.route('/reset_gesture', methods=['POST'])
