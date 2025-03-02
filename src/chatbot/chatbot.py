@@ -71,50 +71,14 @@ def generate_asl_response(english_text):
     return simplified_response
 
 
-# def generate_asl_response(input_text):
-#     """
-#     Generates a response using FLAN-T5 and simplifies it to basic ASL grammar.
-#     """    
-#     if input_text.strip().endswith(("what", "where", "how","?")):
-#         response_type = "Answer briefly in ASL grammar."
-#     else:
-#         response_type = "Continue the conversation naturally in ASL grammar. Respond briefly using essential words only."
-    
-#     # Define the prompt for FLAN-T5
-#     prompt = (
-#         "{response_type}\n\n"
-#         "Examples:\n"
-#         "Input: 'Your name what?'\nResponse: 'My name flan.'\n\n"
-#         "Input: 'You help me, this?'\nResponse: 'Yes, help you.'\n\n"
-#         f"Input: '{input_text}'\nResponse:"
-#     )
-#     # Tokenize the prompt
-#     inputs = tokenizer(prompt, return_tensors="pt", padding=True, truncation=True)
-    
-#     # Generate the response
-#     outputs = model.generate(
-#         inputs["input_ids"],
-#         max_new_tokens=20,  # Limit to keep response concise
-#         temperature=0.4,  # Lower for more straightforward responses
-#         top_p=0.9,
-#         do_sample=True,
-#     )
-    
-#     # Decode and simplify the response
-#     asl_response = tokenizer.decode(outputs[0], skip_special_tokens=True).strip()
-#     simplified_response = simplify_to_asl_grammar(asl_response)
-    
-#     print("Pre-simplified response:", asl_response)
-#     print("Post-simplified response:", simplified_response)
-#     return simplified_response
-
 def main():
     # File path for input
-    file_path = "asl_recognition/ASL_to_Text.txt"
+    input_file_path = "asl_recognition/ASL_to_Text.txt"
+    # output_file_path = "chatbot/Text_to_ASL.txt"
 
     # Check if file exists
-    if os.path.exists(file_path):
-        with open(file_path, 'r', encoding='utf-8') as file:
+    if os.path.exists(input_file_path):
+        with open(input_file_path, 'r', encoding='utf-8') as file:
             inputs = file.readlines()
         
         print("Processing inputs from file:")
@@ -134,7 +98,7 @@ def main():
                 asl_resp = generate_asl_response(english_resp)
                 print("Post-simplified (ASL) response:", asl_resp)
     else:
-        print(f"File not found: {file_path}")
+        print(f"File not found: {input_file_path}")
 
 if __name__ == "__main__":
     main()
