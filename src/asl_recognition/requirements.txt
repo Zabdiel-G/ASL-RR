@@ -17,7 +17,6 @@ grpcio==1.66.2
 h5py==3.12.1
 idna==3.10
 jax==0.4.33
-jaxlib==0.4.33
 Jinja2==3.1.4
 joblib==1.4.2
 keras==3.6.0
@@ -28,7 +27,7 @@ markdown-it-py==3.0.0
 MarkupSafe==2.1.5
 matplotlib==3.9.2
 mdurl==0.1.2
-mediapipe==0.10.14
+mediapipe
 ml-dtypes==0.4.1
 mpmath==1.3.0
 namex==0.0.8
@@ -56,11 +55,6 @@ sentencepiece==0.2.0
 six==1.16.0
 sounddevice==0.5.0
 sympy==1.13.1
-tensorboard==2.17.1
-tensorboard-data-server==0.7.2
-tensorflow==2.17.0
-tensorflow-intel==2.17.0
-tensorflow-io-gcs-filesystem==0.31.0
 termcolor==2.4.0
 threadpoolctl==3.5.0
 torch==2.5.1

@@ -20,7 +20,7 @@ def process_video_stream(
     class_mapping: dict[int, str],
     holistic: any,
     frames_to_extract: int = 50,
-    sampling_duration: int = 4,
+    sampling_duration: int = 2,
     frame_rate: int = 100,
     resolution_x: int = 720, 
     resolution_y: int = 720,
@@ -50,21 +50,26 @@ def process_video_stream(
     frame_buffer: Deque[np.ndarray] = deque(maxlen=frame_rate * sampling_duration)
     sentence_buffer = []
     is_detecting = False
+    is_recording = False
     start_time = time.time()
+    gesture_sentence = ""
 
     while cap.isOpened():
         ret, frame = cap.read()
+        result = None
         if not ret:
             break
 
         image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
         # Process the frame with MediaPipe
-        result = holistic.process(image)
+        if is_detecting:
+            result = holistic.process(image)
+            if result and (result.pose_landmarks or result.left_hand_landmarks or result.right_hand_landmarks):
+                _, keypoints = preprocess_frames(result)
+            for _ in range(2):  
+                frame_buffer.append(keypoints)  
 
-        # Preprocess the frame to extract keypoints
-        _, keypoints = preprocess_frames(result)
-        frame_buffer.append(keypoints)
         elapsed_time = time.time() - start_time
 
         if is_detecting and elapsed_time >= sampling_duration:
@@ -73,26 +78,27 @@ def process_video_stream(
                 if len(frame_buffer) >= frames_to_extract:
                     try:
                         top_predictions = make_prediction(frame_buffer, model, class_mapping)
-                        # Print the top predictions
-                        candidate_words_probs = [
-                            (label, confidence) for label, confidence in top_predictions
-                        ]
-                        extract_last_word = get_last_word_from_log(log_file)
+                        candidate_words_probs = [(label, confidence) for label, confidence in top_predictions]
+                        last_word = sentence_buffer[-1] if sentence_buffer else None
 
                         print("Top Predictions:")
                         for label, confidence in top_predictions:
                             print(f"{label}: {confidence:.2%}")
-                        if last_word is None:
+
+                        next_word = buffer_predictions(top_predictions, last_word, candidate_words_probs, end_token="STOP")
+
+                        if next_word is None:
                             next_word = top_predictions[0][0]
-                        else:
-                            next_word = predict_next_word(last_word, candidate_words_probs)
-                        sentence_buffer.append(next_word)
-                        sentence = buffer_predictions(top_predictions, sentence_buffer, end_token="STOP")
-                        if "STOP" in sentence_buffer:
-                            sentence = " ".join(sentence_buffer[:-1]) 
-                            print(f"Complete Sentence: {sentence}")
-                            log_full_sentence(sentence, log_file)
-                            sentence_buffer.clear()
+
+                        if next_word:
+                            sentence_buffer.append(next_word)
+                            print(f"Updated Sentence Buffer: {' '.join(sentence_buffer)}")
+
+                        if next_word == "STOP":
+                            complete_sentence = " ".join(sentence_buffer[:-1])  # Remove "STOP" from sentence
+                            print(f"Complete Sentence: {complete_sentence}")
+                            log_full_sentence(complete_sentence, log_file)
+                            sentence_buffer.clear() 
                     except ValueError as e:
                         print(e)
                 else:
@@ -101,7 +107,7 @@ def process_video_stream(
                 print("No significant movement detected. Skipping prediction.")
 
             frame_buffer.clear()
-            start_time = time.time()
+            start_time = time.time()    
 
         # Display current detection state
         state_text = "STARTING" if is_detecting else "NOT STARTING"
@@ -131,18 +137,17 @@ def process_video_stream(
         # Display the frame
         cv2.imshow("Webcam Feed", frame)
 
+        with open("ASL_to_Text.txt", "w") as file:
+            file.write(gesture_sentence.strip())  # Strip trailing space
+        # Handle key presses
         key = cv2.waitKey(1) & 0xFF
-        if key == ord(' '):  # Toggle start/stop
-            is_detecting = not is_detecting
-            # Append "STOP" to the sentence buffer when space is pressed
-            sentence_buffer.append("STOP")
-            sentence = " ".join(sentence_buffer[:-1])  # Form the sentence excluding the "STOP" token
-            if sentence:
-                print(f"Complete Sentence: {sentence}")
-                log_full_sentence(sentence, log_file)
-        elif key == ord('q'):  # Quit
+        if key == ord('q'):  # Quit
             break
-
+        elif key == ord(' '):  # Toggle start/stop
+            is_detecting = not is_detecting
+            rdingis_reco = not is_recording
+        # elif key == ord('r'):
+        #     gesture_sentence = ""
     cap.release()
     cv2.destroyAllWindows()
 

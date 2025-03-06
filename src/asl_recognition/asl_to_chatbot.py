@@ -1,3 +1,5 @@
+from predictive_texting import predict_next_word
+
 def log_full_sentence(sentence, log_file="full_sentence.txt"):
     """
     Logs the full sentence to a text file.
@@ -15,13 +17,12 @@ def log_full_sentence(sentence, log_file="full_sentence.txt"):
 
     print(f"Full sentence logged to {log_file}")
     
-def buffer_predictions(predictions, sentence_buffer, end_token="STOP"):
+def buffer_predictions(predictions, last_word, candidate_words_probs, end_token="STOP"):
     """
-    Adds predictions to the sentence buffer and checks for the end condition.
-
     Args:
         predictions (list): List of top predictions (label, probability).
-        sentence_buffer (list): Buffer to hold sentence words.
+        last_word (str): The last word from the log file to determine context.
+        candidate_words_probs (list): List of (word, probability) pairs.
         end_token (str): Token that signals the end of a sentence.
 
     Returns:
@@ -30,16 +31,12 @@ def buffer_predictions(predictions, sentence_buffer, end_token="STOP"):
     if not predictions or len(predictions) == 0:
         return None
 
-    # Add the top prediction (most confident) to the sentence buffer
     label, confidence = predictions[0]
-    sentence_buffer.append(label)
 
-    # Check if the end token is detected
     if label == end_token:
-        # Form the sentence and clear the buffer
-        sentence = " ".join(sentence_buffer[:-1])  # Exclude the end token
-        sentence_buffer.clear()
-        return sentence
+        return end_token  
 
-    return None
+    next_word = predict_next_word(last_word, candidate_words_probs)
+
+    return next_word if next_word else label
     
