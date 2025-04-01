@@ -1,0 +1,199 @@
+        "**Example 1:**\n"
+        "English: 'An athlete explored a rare artifact.'\n"
+        "ASL: 'Athlete explore rare artifact.'\n\n"
+
+        "**Example 2:**\n"
+        "English: 'A physician forecasted a historical event.'\n"
+        "ASL: 'Doctor predict past event.'\n\n"
+
+        "**Example 3:**\n"
+        "English: 'A cryptographer tested a sophisticated algorithm.'\n"
+        "ASL: 'Cryptographer test complex algorithm.'\n\n"
+
+        "**Example 4:**\n"
+        "English: 'A detective theorized a delicate embroidery.'\n"
+        "ASL: 'Detective guess fragile embroidery.'\n\n"
+
+        "**Example 5:**\n"
+        "English: 'An astronomer reflected on a rare gemstone.'\n"
+        "ASL: 'Astronomer think-about rare gemstone.'\n\n"
+
+        "**Example 6:**\n"
+        "English: 'A zoologist translated a peaceful garden.'\n"
+        "ASL: 'Zoologist translate calm garden.'\n\n"
+
+        "**Example 7:**\n"
+        "English: 'A mathematician invented a novel method.'\n"
+        "ASL: 'Mathematician invent new method.'\n\n"
+
+        "**Example 8:**\n"
+        "English: 'A seismologist traced a mysterious phenomenon.'\n"
+        "ASL: 'Seismologist analyze mysterious phenomenon.'\n\n"
+
+        "**Example 9:**\n"
+        "English: 'A composer investigated a groundbreaking discovery.'\n"
+        "ASL: 'Composer research important discovery.'\n\n"
+
+        "**Example 10:**\n"
+        "English: 'I'm going to Lollapalooza.'\n"
+        "ASL: 'I go L-o-l-l-a-p-a-l-o-o-z-a.'\n\n"
+
+        "**Example 11:**\n"
+        "English: 'I’m counting down the days until the concert.'\n"
+        "ASL: 'Concert soon, I count days.'\n\n"
+
+        "**Example 12:**\n"
+        "English: 'That is fake news.'\n"
+        "ASL: 'That fake news.'\n\n"
+
+        "**Example 13:**\n"
+        "English: 'I have no money at the moment.'\n"
+        "ASL: 'Now, I broke.'\n\n"
+
+        "**Example 14:**\n"
+        "English: 'I run four miles every morning.'\n"
+        "ASL: 'Every morning, I run four miles.'\n\n"
+
+        "**Example 15:**\n"
+        "English: 'I know that there was a big church here.'\n"
+        "ASL: 'Here before, big church I know.'\n\n"
+
+        "**Example 16:**\n"
+        "English: 'The game looked fun, but all the pieces were missing.'\n"
+        "ASL: 'Game look fun, but pieces all gone.'\n\n"
+
+        "**Example 17:**\n"
+        "English: 'She could do it in her sleep.'\n"
+        "ASL: 'She expert, easy for her.'\n\n"
+
+        "**Example 18:**\n"
+        "English: 'I like open spaces.'\n"
+        "ASL: 'I like open space.'\n\n"
+
+        "**Example 19:**\n"
+        "English: 'Juliet flipped through the book carefully.'\n"
+        "ASL: 'J-u-l-i-e-t careful turn-pages book.'\n\n"
+
+        "**Example 20:**\n"
+        "English: 'The camping trip was so awesome that I didn't want to come home.'\n"
+        "ASL: 'Camping trip amazing, I not-want come home.'\n\n"
+
+        "**Example 21:**\n"
+        "English: 'She didn't have a printer so she always had to use her phone for tickets.'\n"
+        "ASL: 'She no printer, always use phone ticket.'\n\n"
+
+        "**Example 22:**\n"
+        "English: 'I can open the door.'\n"
+        "ASL: 'Door I can open.'\n\n"
+
+        "**Example 23:**\n"
+        "English: 'You can start from the basic stitches, and go from there.'\n"
+        "ASL: 'You start basic stitch, continue.'\n\n"
+
+        "**Example 24:**\n"
+        "English: 'She wanted to be bold but was too afraid to start.'\n"
+        "ASL: 'She want bold, but scared start.'\n\n"
+
+        "**Example 25:**\n"
+        "English: 'He ordered a latte.'\n"
+        "ASL: 'He order l-a-t-t-e.'\n\n"
+
+        "**Example 26:**\n"
+        "English: 'It's hard to distinguish fake news.'\n"
+        "ASL: 'Fake news hard recognize.'\n\n"
+
+        "**Example 27:**\n"
+        "English: 'Look at me, Mom!'\n"
+        "ASL: 'Mom, look me!'\n\n"
+
+        "**Example 28:**\n"
+        "English: 'He was born in Tunisia but moved to Amsterdam when he was six.'\n"
+        "ASL: 'He born T-u-n-i-s-i-a, age six move A-m-s-t-e-r-d-a-m.'\n\n"
+
+        "**Example 29:**\n"
+        "English: 'Was John sick?'\n"
+        "ASL: 'J-o-h-n sick?'\n\n"
+
+        "**Example 30:**\n"
+        "English: 'My home is bright pink and has yellow flowers growing all around it.'\n"
+        "ASL: 'My home bright pink, yellow flowers grow around.'\n\n"
+
+        "**Example 31:**\n"
+        "English: 'Her hands were all scabbed over.'\n"
+        "ASL: 'Her hands scab all-over.'\n\n"
+
+        "**Example 32:**\n"
+        "English: 'Tom threw a party at his house while his parents were on vacation.'\n"
+        "ASL: 'T-o-m party his house, parents vacation.'\n\n"
+
+        "**Example 33:**\n"
+        "English: 'Perhaps you should've gotten a bigger one.'\n"
+        "ASL: 'Maybe you should get bigger one.'\n\n"
+
+        "**Example 34:**\n"
+        "English: 'You can't talk to me unless you tell me your favorite color.'\n"
+        "ASL: 'You not talk me unless your favorite color tell-me.'\n\n"
+
+        "**Example 35:**\n"
+        "English: 'I didn't know why my dad would have something like that.'\n"
+        "ASL: 'Why my dad have that? I not know.'\n\n"
+
+        "**Example 36:**\n"
+        "English: 'My brother just got home.'\n"
+        "ASL: 'My brother now arrive home.'\n\n"
+
+        "**Example 37:**\n"
+        "English: 'With these headphones, I can't hear anything.'\n"
+        "ASL: 'These headphones, I hear nothing.'\n\n"
+
+        "**Example 38:**\n"
+        "English: 'Her flight took her to Singapore by way of Sydney.'\n"
+        "ASL: 'Her flight go S-i-n-g-a-p-o-r-e, stop S-y-d-n-e-y.'\n\n"
+
+        "**Example 39:**\n"
+        "English: 'The library had frustratingly short business hours.'\n"
+        "ASL: 'Library hours short, frustrating.'\n\n"
+
+        "**Example 40:**\n"
+        "English: 'The pencil broke in the middle of my test.'\n"
+        "ASL: 'Test middle, my pencil break.'\n\n"
+
+        "**Example 41:**\n"
+        "English: 'She lied on her resume that she had experience on Twitter when she had never used social media.'\n"
+        "ASL: 'Her resume, she lie say experience T-w-i-t-t-e-r, but never use social media.'\n\n"
+
+        "**Example 42:**\n"
+        "English: 'We closed the deal successfully.'\n"
+        "ASL: 'Deal finish, success.'\n\n"
+
+        "**Example 43:**\n"
+        "English: 'He had a sore throat so I gave him my bottle of water and told him to keep it.'\n"
+        "ASL: 'His throat sore, I give my water bottle, tell him keep.'\n\n"
+
+        "**Example 44:**\n"
+        "English: 'As a child, her house was surrounded by towering oak trees which she always thought were one bad storm away from toppling.'\n"
+        "ASL: 'When child, her house big oak trees surround, she always think storm maybe knock-down.'\n\n"
+
+        "**Example 45:**\n"
+        "English: 'The feature is available in both front-load and top-load washers.'\n"
+        "ASL: 'Feature both front-load, top-load washers available.'\n\n"
+
+        "**Example 46:**\n"
+        "English: 'Does it make a big difference?'\n"
+        "ASL: 'Big difference?'\n\n"
+
+        "**Example 47:**\n"
+        "English: 'No problem!'\n"
+        "ASL: 'No problem!'\n\n"
+
+        "**Example 48:**\n"
+        "English: 'Who do they believe you are?'\n"
+        "ASL: 'They think you who?'\n\n"
+
+        "**Example 49:**\n"
+        "English: 'Don't go there!'\n"
+        "ASL: 'There, don't go!'\n\n"
+
+        "**Example 50:**\n"
+        "English: 'She was riding on a high-speed train.'\n"
+        "ASL: 'She ride fast train.'\n\n"
