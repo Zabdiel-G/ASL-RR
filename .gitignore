@@ -11,3 +11,4 @@ __pycache__/
 
 # Ignore any .env file that contains secrets
 .env
+data/pose_per_individual_videos.zip
