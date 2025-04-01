@@ -11,3 +11,5 @@ __pycache__/
 
 # Ignore any .env file that contains secrets
 .env
+Data/look_up_table.json
+*.json
