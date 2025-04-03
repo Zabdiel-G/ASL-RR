@@ -87,10 +87,36 @@ h1 {
 
 .button-container {
   display: flex;
-  flex-wrap: wrap; 
-  gap: 100px;
+  flex-wrap: wrap;
+  gap: 10px;
   margin-top: 2px;
   width: 100%;
+}
+
+button {
+  padding: 8px 12px;
+  font-size: 1rem;
+  cursor: pointer;
+  flex: 1;
+  min-width: 140px;
+}
+
+.respond-button {
+  display: block;
+  width: 100%;
+  padding: 10px 15px;
+  font-size: 1.2rem;
+  font-weight: bold;
+  background-color: white;  /* Match other buttons */
+  border: 2px solid black;
+  color: black;
+  text-align: center;
+  margin-top: 10px; /* Space below the previous buttons */
+}
+
+.respond-button:hover {
+  background-color: lightgray; /* Light gray hover effect */
+  color: black;
 }
 
 #videoFeed {
