@@ -1,37 +1,51 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ASL Recognition and Response</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
-</head>
-<body>
-  <h1>ASL Recognition and Response</h1>
-  <div class="container">
-    <div class="left-panel">
-      <img id="videoFeed" src="{{ url_for('video_feed') }}" alt="Video Feed">
-      
-      <div id="status">
-        <span id="stateText">Idle</span><br>
-        <div id="gestureSentenceText">No gestures detected</div>
-      </div>
-
-      <div class="button-container">
-        <button id="toggleButton">Start/Stop Detection</button>
-        <button id="resetButton">Reset Gesture</button>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ASL Recognition and Response</title>
+    <link href="{{ url_for('static', filename='css/testlogo.jpg') }}" rel="icon"/>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+  </head>
+  <body>
+    <div class="titles">
+      <h1>ASL Recognition and Response</h1>
+      <img src="{{ url_for('static', filename='css/logo.png') }}" alt="ASL logo">
+      <hr>
+      <div class="boxes">
+          <h2 class="camera-title">Camera for ASL Recognition</h2><h2 class="response-title">ASL/Text Response</h2>
       </div>
     </div>
-
-    <div class="right-panel">
-      <div id="chatContainer">
-        <h2>Chatbot Response</h2>
-        <div id="chatOutput">No response yet.</div>
-        <button id="chatButton">Process Gesture</button>
-      </div>
-    </div>
-  </div>
+    <div class="container">
+      <div class="left-panel">
+        <img id="videoFeed" src="{{ url_for('video_feed') }}" alt="Video Feed">
   
-  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
-</body>
+        <div class="button-container">
+          <button type="button" id="toggleButton">Start/Stop Detection</button>
+          <button type="button" id="resetButton">Reset Gesture</button> 
+          <button type ="button" id="chatButton">Respond</button>
+        </div>
+        
+        <div id="status">
+          <span id="stateText">Idle</span><br>
+          <div id="gestureSentenceText">No gestures detected</div>
+        </div>
+      </div>
+
+      <div class="right-panel">
+        <div id="chatContainer">
+          <!-- <h2>Chatbot Response</h2> -->
+          <div id="chatOutput">No response yet.</div>
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      <p class="credits">T3MP Group 2025</p>
+      <p><a class="footerlink" href="https://www.cs.csub.edu" target="_blank">
+          Visit the CS website here</a></p>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+  </body>
 </html>
