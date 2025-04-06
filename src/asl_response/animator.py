@@ -7,19 +7,64 @@ from config import MODIFIED_TABLE, CATEGORIES, FRAME_WIDTH, FRAME_HEIGHT, ANIMAT
 from response_utils import load_keypoints_from_json, draw_keypoints
 
 
+import os
+from glob import glob
+import re
+
 def preload_frames(word):
+    # 1. Check if it's an explicit fingerspelling pattern like A-B-C
+    if re.match(r'^([a-zA-Z]-){1,}[a-zA-Z]$', word):
+        letters = word.upper().split('-')
+        all_frames = []
+
+        for letter in letters:
+            found = False
+            for category in CATEGORIES:
+                folder_path = os.path.join(MODIFIED_TABLE, category, letter)
+                if os.path.exists(folder_path):
+                    files = sorted(glob(os.path.join(folder_path, "*.json")))
+                    if files:
+                        frames = [load_keypoints_from_json(f) for f in files]
+                        all_frames.extend(frames)
+                        print(f"[Fingerspell] Loaded '{letter}' from {category}/")
+                        found = True
+                        break
+            if not found:
+                print(f"[Error] Letter '{letter}' not found.")
+        return all_frames
+
+    # 2. Try to load as a regular word
     for category in CATEGORIES:
         folder_path = os.path.join(MODIFIED_TABLE, category, word)
         if os.path.exists(folder_path):
             files = sorted(glob(os.path.join(folder_path, "*.json")))
-            if not files:
+            if files:
+                frames = [load_keypoints_from_json(f) for f in files]
+                print(f"[Load] Loaded '{word}' from {category}/")
+                return frames
+            else:
                 print(f"[Error] No frames in '{folder_path}'.")
                 return []
-            frames = [load_keypoints_from_json(f) for f in files]
-            print(f"[Load] Loaded '{word}' from {category}/")
-            return frames
-    print(f"[Error] Word '{word}' not found.")
-    return []
+
+    # 3. Fallback: fingerspell each letter of the word
+    print(f"[Fallback] Word '{word}' not found. Falling back to fingerspelling.")
+    all_frames = []
+    for letter in word.upper():
+        found = False
+        for category in CATEGORIES:
+            folder_path = os.path.join(MODIFIED_TABLE, category, letter)
+            if os.path.exists(folder_path):
+                files = sorted(glob(os.path.join(folder_path, "*.json")))
+                if files:
+                    frames = [load_keypoints_from_json(f) for f in files]
+                    all_frames.extend(frames)
+                    print(f"[Fallback-Fingerspell] Loaded '{letter}' from {category}/")
+                    found = True
+                    break
+        if not found:
+            print(f"[Error] Letter '{letter}' not found.")
+    return all_frames
+
 
 
 def animate_word(word, scale=3.0):
