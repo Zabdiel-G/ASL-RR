@@ -1,4 +1,4 @@
 Input: how fix computer broken
-English Input: How can I fix the broken computer?
-English Response: You can try restarting the computer or checking for any loose connections.
-ASL: computer r-e-s-t-a-r-t try c-o-n-n-e-c-t-i-o-n l-o-o-s-e check
+English Input: 'How do I fix the broken computer?'
+English Response: You can try restarting the computer or seeking help from a tech professional.
+ASL: t-e-c-h professional help ask or computer r-e-s-t-a-r-t try you
