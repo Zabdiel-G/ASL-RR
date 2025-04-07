@@ -1,7 +1,5 @@
 import re
 import os
-from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
-import torch
 import openai
 from dotenv import load_dotenv
 
@@ -448,7 +446,7 @@ def generate_asl_response(english_response):
 
 def main():
     # File path for input
-    input_file_path = "asl_recognition/ASL_to_Text.txt"
+    input_file_path = "chatbot/ASL_to_Text.txt"
     output_file_path = "chatbot/Text_to_ASL.txt"
 
     # Check if file exists
