@@ -7,7 +7,6 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from pytorch_i3d import InceptionI3d
-from pathlib import Path
 
 import numpy as np
 import cv2
@@ -19,9 +18,7 @@ sentence_buffer = []
 def create_WLASL_dictionary():
     global wlasl_dict 
     wlasl_dict = {}
-    file_path = Path("preprocess" ) / "wlasl_class_list.txt"
-
-    with file_path.open() as file:
+    with open('src/asl_recognition/preprocess/wlasl_class_list.txt') as file:
         for line in file:
             split_list = line.split()
             if len(split_list) != 2:
@@ -31,6 +28,7 @@ def create_WLASL_dictionary():
                 key = int(split_list[0])
                 value = split_list[1]
             wlasl_dict[key] = value
+
 def send_sentence(sentence):
     # have no clue how to send it rn. 
     # For now I made it similiar to the previous iteration
@@ -138,6 +136,6 @@ def load_model(weights, num_classes):
 
 if __name__ == '__main__':
     create_WLASL_dictionary()
-    weights = 'archived/asl2000/FINAL_nslt_2000_iters=5104_top1=32.48_top5=57.31_top10=66.31.pt'
+    weights = 'src/asl_recognition/archived/asl2000/FINAL_nslt_2000_iters=5104_top1=32.48_top5=57.31_top10=66.31.pt'
     num_classes = 2000
     load_model(weights, num_classes)
