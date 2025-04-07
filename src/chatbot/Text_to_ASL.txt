@@ -1,4 +1,4 @@
 Input: how fix computer broken
-English Input: How can I fix a broken computer?
-English Response: I would suggest using a tool called a pcb, or something like that.
-ASL: suggest using a tool called a pcb, or something like that.
+English Input: How can I fix the broken computer?
+English Response: You can try restarting the computer or checking for any loose connections.
+ASL: computer r-e-s-t-a-r-t try c-o-n-n-e-c-t-i-o-n l-o-o-s-e check
