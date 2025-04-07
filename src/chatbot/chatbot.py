@@ -20,7 +20,7 @@ def load_wlasl_words(filepath):
     with open(filepath, 'r', encoding='utf-8') as f:
         return set(line.strip().split('\t')[1].lower() for line in f if '\t' in line)
 
-wlasl_words = load_wlasl_words("asl_recognition/models/wlasl_class_list.txt")
+wlasl_words = load_wlasl_words("asl_recognition/preprocess/wlasl_class_list.txt")
 
 # Post-process gloss output to match WLASL list or convert to fingerspelling
 def postprocess_asl_gloss(gloss, wlasl_words):
@@ -33,25 +33,6 @@ def postprocess_asl_gloss(gloss, wlasl_words):
             fingerspelled = '-'.join(list(word))
             processed.append(fingerspelled)
     return ' '.join(processed)
-
-# def simplify_to_asl_grammar(text):
-#     """
-#     Simplifies English sentences to basic ASL grammar by removing auxiliary verbs, 
-#     non-essential pronouns, and other unnecessary words.
-#     """
-#     # List of auxiliary verbs to remove
-#     auxiliary_verbs = r'\b(am|is|are|was|were|be|been|being|have|has|had|do|does|did|will|would|shall|should|may|might|must|can|could)\b'
-#     # List of non-essential pronouns
-#     non_essential_pronouns = r'\b(I|you|we|he|she|it|they)\b'
-    
-#     # Remove auxiliary verbs
-#     text = re.sub(auxiliary_verbs, '', text, flags=re.IGNORECASE)
-#     # Remove non-essential pronouns
-#     text = re.sub(non_essential_pronouns, '', text, flags=re.IGNORECASE)
-#     # Remove extra spaces caused by deletions
-#     text = re.sub(r'\s+', ' ', text).strip()
-    
-#     return text
 
 def interpret_asl_input(input_text):
     """
@@ -505,9 +486,9 @@ def main():
     else:
         print(f"File not found: {input_file_path}")
 
-# # Testing for interpret_asl_input()
+# # Testing the full pipeline
 # if __name__ == "__main__":
-#     print("\n Running standalone test for interpret_asl_input():\n")
+#     print("\n Running test for full ASL to Gloss pipeline:\n")
 
 #     # Test Cases
 #     test_cases = [
@@ -518,40 +499,21 @@ def main():
 #         "mother cook dinner family",
 #     ]
 
-#     # Run each test case
+#     # Run each test case through the full pipeline
 #     for test_input in test_cases:
-#         result = interpret_asl_input(test_input)
-#         print(f"ASL Input: {test_input}")
-#         print(f"English Interpretation: {result}\n")
+#         print(f"\nASL Input: {test_input}")
 
-# Testing the full pipeline
-if __name__ == "__main__":
-    print("\n Running test for full ASL to Gloss pipeline:\n")
+#         # Step 1: Interpret ASL structure into English
+#         english_interpretation = interpret_asl_input(test_input)
+#         print(f"English Interpretation: {english_interpretation}")
 
-    # Test Cases
-    test_cases = [
-        "how fix computer broken",
-        "dog bark loud night",
-        "where find bus stop near",
-        "friend visit home weekend",
-        "mother cook dinner family",
-    ]
+#         # Step 2: Generate chatbot response in English
+#         english_response = generate_english_response(english_interpretation)
+#         print(f"English Response: {english_response}")
 
-    # Run each test case through the full pipeline
-    for test_input in test_cases:
-        print(f"\nASL Input: {test_input}")
-
-        # Step 1: Interpret ASL structure into English
-        english_interpretation = interpret_asl_input(test_input)
-        print(f"English Interpretation: {english_interpretation}")
-
-        # Step 2: Generate chatbot response in English
-        english_response = generate_english_response(english_interpretation)
-        print(f"English Response: {english_response}")
-
-        # Step 3: Convert chatbot response into ASL gloss
-        final_gloss = generate_asl_response(english_response)
-        print(f"Final ASL Gloss: {final_gloss}")
+#         # Step 3: Convert chatbot response into ASL gloss
+#         final_gloss = generate_asl_response(english_response)
+#         print(f"Final ASL Gloss: {final_gloss}")
 
 if __name__ == "__main__":
     main()
