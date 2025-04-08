@@ -1,0 +1,199 @@
+Example 51:
+English: "I have a good idea."
+ASL: "I have good idea."
+
+Example 52:
+English: "She didn't drink, but she didn't want people to realize that, so she ordered a ginger ale at the bar."
+ASL: "She not drink, but not-want people know, so she order g-i-n-g-e-r a-l-e bar."
+
+Example 53:
+English: "He needed thirteen stitches."
+ASL: "He need 13 stitches."
+
+Example 54:
+English: "I will have a baby in the near future."
+ASL: "Soon, I have baby."
+
+Example 55:
+English: "The Avengers series is basically over."
+ASL: "A-v-e-n-g-e-r-s series finish almost."
+
+Example 56:
+English: "When I was a kid, I had a best friend named Marissa."
+ASL: "When I child, my best friend name M-a-r-i-s-s-a."
+
+Example 57:
+English: "He was very excited to see her, after two months away."
+ASL: "Two months apart, he see her, very excited."
+
+Example 58:
+English: "A few turned their heads to look at each other deliberately."
+ASL: "Few turn head, look each-other intentional."
+
+Example 59:
+English: "That’s a huge load off my mind."
+ASL: "That big relief for me."
+
+Example 60:
+English: "We should be able to resolve our differences."
+ASL: "We should solve our disagreement."
+
+Example 61:
+English: "I don't like the polluted atmosphere of big cities."
+ASL: "Big city, air dirty, I don't like."
+
+Example 62:
+English: "Spring is the prettiest season."
+ASL: "Spring most beautiful season."
+
+Example 63:
+English: "My show is going to come back soon."
+ASL: "My show soon return."
+
+Example 64:
+English: "I do not like meat."
+ASL: "Meat, I don't like."
+
+Example 65:
+English: "I must have my TV set checked."
+ASL: "My TV must check."
+
+Example 66:
+English: "I don’t think you should go out with him."
+ASL: "You date him? I think not."
+
+Example 67:
+English: "I'm going to make you a list of what needs to be done."
+ASL: "I make list for you, what need do."
+
+Example 68:
+English: "This way you can start to heal."
+ASL: "This way, you can start heal."
+
+Example 69:
+English: "Your first week of yoga classes is on us."
+ASL: "Your first week yoga class free."
+
+Example 70:
+English: "That’ll have to wait."
+ASL: "That must wait."
+
+Example 71:
+English: "My cat runs very fast."
+ASL: "My cat run fast."
+
+Example 72:
+English: "She was in Australia when the pandemic started."
+ASL: "Pandemic start, she in A-u-s-t-r-a-l-i-a."
+
+Example 73:
+English: "I had to put a pin in his femur."
+ASL: "His femur, I insert pin."
+
+Example 74:
+English: "Let's never speak of this again!"
+ASL: "This, never talk about again!"
+
+Example 75:
+English: "He made tuna noodle casserole for their first anniversary dinner, not realizing she found it disgusting."
+ASL: "First anniversary dinner, he make t-u-n-a n-o-o-d-l-e casserole, not-know she hate."
+
+Example 76:
+English: "Don’t get too excited!"
+ASL: "Too excited, don't!"
+
+Example 77:
+English: "Shape up or ship out!"
+ASL: "Improve or leave!"
+
+Example 78:
+English: "Kate was surprised when she saw that big dog."
+ASL: "K-a-t-e see big dog, surprise!"
+
+Example 79:
+English: "His voice was pitchy and weak, partially because he was so nervous."
+ASL: "His voice off, weak, why? Nervous."
+
+Example 80:
+English: "You don’t listen to me."
+ASL: "You not listen me."
+
+Example 81:
+English: "I am here for you."
+ASL: "I here support you."
+
+Example 82:
+English: "This is the big break I've been waiting for."
+ASL: "This big opportunity, I wait for."
+
+Example 83:
+English: "It is the morning."
+ASL: "Now morning."
+
+Example 84:
+English: "I spread the map on the table."
+ASL: "Map, I spread table."
+
+Example 85:
+English: "Tom's car is easily recognizable since there is a dent in the front bumper."
+ASL: "T-o-m car easy recognize, why? Front bumper dent."
+
+Example 86:
+English: "One day, maybe, she'd be interested, but not right now."
+ASL: "Maybe future, she interested, but not now."
+
+Example 87:
+English: "He wanted her to slow down a little bit as she sang."
+ASL: "She sing, he want her slow down little."
+
+Example 88:
+English: "Thomas added his own name to the list of people who wanted to take part in the dance."
+ASL: "T-h-o-m-a-s add his name list, people want join dance."
+
+Example 89:
+English: "I can do what you said."
+ASL: "You say what, I can do."
+
+Example 90:
+English: "We still have a couple of big decisions to make."
+ASL: "Big decisions, we still need make."
+
+Example 91:
+English: "She desperately wanted to meet an alien before she died."
+ASL: "She really want meet alien before die."
+
+Example 92:
+English: "She found little pellets of iron in her garden bed."
+ASL: "Her garden bed, she find small iron pieces."
+
+Example 93:
+English: "I call upon the scientific community in our country to turn their great talents now to the cause of mankind and world peace."
+ASL: "I ask science community our country, now use skill help people, world peace."
+
+Example 94:
+English: "Can we stop pretending to like kale?"
+ASL: "We stop fake-like k-a-l-e?"
+
+Example 95:
+English: "Where is the President right now?"
+ASL: "President now where?"
+
+Example 96:
+English: "I need a dollar for the vending machine."
+ASL: "Vending machine, I need 1-dollar."
+
+Example 97:
+English: "Which is deeper, a lake or an ocean?"
+ASL: "Lake, ocean, which deep more?"
+
+Example 98:
+English: "He dreamed of leaving his law firm to open a portable dog wash."
+ASL: "He dream leave law firm, open portable dog wash."
+
+Example 99:
+English: "David subscribes to the stuffing strategy over nicely folding clothes."
+ASL: "D-a-v-i-d prefer stuff clothes, not fold nice."
+
+Example 100:
+English: "Jeanne wished she had chosen the red button."
+ASL: "J-e-a-n-n-e wish she pick red button."

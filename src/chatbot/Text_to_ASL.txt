@@ -1,0 +1,22 @@
+Input: <<<<<<< Updated upstream
+English Input: ASL Input: 'MORNING, WORK FINISH, I RELAX'
+English Interpretation: 'In the morning, after finishing work, I relax.'
+English Response: Sounds like a nice way to unwind after a busy day!
+ASL: busy day finish nice relax s-o-u-n-d-s
+
+Input: How much water does someone need to drink daily?
+English Input: DAILY, WATER HOW-MUCH PERSON NEED DRINK?
+English Response: An average person needs to drink about 8 cups of water daily to stay hydrated.
+ASL: daily person average need drink water 8 c-u-p-s stay h-y-d-r-a-t-e-d
+
+Input: =======
+English Input: ASL Input: 'MORNING, WORK FINISH, I EAT BREAKFAST'
+English Interpretation: 'In the morning, after finishing work, I eat breakfast.'
+English Response: Sounds like a great routine!
+ASL: r-o-u-t-i-n-e great sound like
+
+Input: >>>>>>> Stashed changes
+English Input: ASL Input: 'MORNING, ME WAKE-UP EARLY'
+English Interpretation: 'In the morning, I woke up early.'
+English Response: That's great to hear! Starting the day early can set a positive tone.
+ASL: great hear day early start positive t-o-n-e s-e-t

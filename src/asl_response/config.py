@@ -29,7 +29,7 @@ multi_word_path = os.path.join(MODIFIED_TABLE, 'multi_word')
 multi_word_folders = set(os.listdir(multi_word_path)) if os.path.exists(multi_word_path) else set()
 
 # Config for the image resolution 
-FRAME_WIDTH = 640
-FRAME_HEIGHT = 480
+FRAME_WIDTH = 360
+FRAME_HEIGHT = 520
 BLANK_FRAME = 255 * np.ones((FRAME_HEIGHT, FRAME_WIDTH, 3), dtype=np.uint8)
 

@@ -1,0 +1,199 @@
+        "**Example 51:**\n"
+        "English: 'I have a good idea.'\n"
+        "ASL: 'I have good idea.'\n\n"
+
+        "**Example 52:**\n"
+        "English: 'She didn't drink, but she didn't want people to realize that, so she ordered a ginger ale at the bar.'\n"
+        "ASL: 'She not drink, but not-want people know, so she order g-i-n-g-e-r a-l-e bar.'\n\n"
+
+        "**Example 53:**\n"
+        "English: 'He needed thirteen stitches.'\n"
+        "ASL: 'He need 13 stitches.'\n\n"
+
+        "**Example 54:**\n"
+        "English: 'I will have a baby in the near future.'\n"
+        "ASL: 'Soon, I have baby.'\n\n"
+
+        "**Example 55:**\n"
+        "English: 'The Avengers series is basically over.'\n"
+        "ASL: 'A-v-e-n-g-e-r-s series finish almost.'\n\n"
+
+        "**Example 56:**\n"
+        "English: 'When I was a kid, I had a best friend named Marissa.'\n"
+        "ASL: 'When I child, my best friend name M-a-r-i-s-s-a.'\n\n"
+
+        "**Example 57:**\n"
+        "English: 'He was very excited to see her, after two months away.'\n"
+        "ASL: 'Two months apart, he see her, very excited.'\n\n"
+
+        "**Example 58:**\n"
+        "English: 'A few turned their heads to look at each other deliberately.'\n"
+        "ASL: 'Few turn head, look each-other intentional.'\n\n"
+
+        "**Example 59:**\n"
+        "English: 'That’s a huge load off my mind.'\n"
+        "ASL: 'That big relief for me.'\n\n"
+
+        "**Example 60:**\n"
+        "English: 'We should be able to resolve our differences.'\n"
+        "ASL: 'We should solve our disagreement.'\n\n"
+
+        "**Example 61:**\n"
+        "English: 'I don't like the polluted atmosphere of big cities.'\n"
+        "ASL: 'Big city, air dirty, I don't like.'\n\n"
+
+        "**Example 62:**\n"
+        "English: 'Spring is the prettiest season.'\n"
+        "ASL: 'Spring most beautiful season.'\n\n"
+
+        "**Example 63:**\n"
+        "English: 'My show is going to come back soon.'\n"
+        "ASL: 'My show soon return.'\n\n"
+
+        "**Example 64:**\n"
+        "English: 'I do not like meat.'\n"
+        "ASL: 'Meat, I don't like.'\n\n"
+
+        "**Example 65:**\n"
+        "English: 'I must have my TV set checked.'\n"
+        "ASL: 'My TV must check.'\n\n"
+
+        "**Example 66:**\n"
+        "English: 'I don’t think you should go out with him.'\n"
+        "ASL: 'You date him? I think not.'\n\n"
+
+        "**Example 67:**\n"
+        "English: 'I'm going to make you a list of what needs to be done.'\n"
+        "ASL: 'I make list for you, what need do.'\n\n"
+
+        "**Example 68:**\n"
+        "English: 'This way you can start to heal.'\n"
+        "ASL: 'This way, you can start heal.'\n\n"
+
+        "**Example 69:**\n"
+        "English: 'Your first week of yoga classes is on us.'\n"
+        "ASL: 'Your first week yoga class free.'\n\n"
+
+        "**Example 70:**\n"
+        "English: 'That’ll have to wait.'\n"
+        "ASL: 'That must wait.'\n\n"
+
+        "**Example 71:**\n"
+        "English: 'My cat runs very fast.'\n"
+        "ASL: 'My cat run fast.'\n\n"
+
+        "**Example 72:**\n"
+        "English: 'She was in Australia when the pandemic started.'\n"
+        "ASL: 'Pandemic start, she in A-u-s-t-r-a-l-i-a.'\n\n"
+
+        "**Example 73:**\n"
+        "English: 'I had to put a pin in his femur.'\n"
+        "ASL: 'His femur, I insert pin.'\n\n"
+
+        "**Example 74:**\n"
+        "English: 'Let's never speak of this again!'\n"
+        "ASL: 'This, never talk about again!'\n\n"
+
+        "**Example 75:**\n"
+        "English: 'He made tuna noodle casserole for their first anniversary dinner, not realizing she found it disgusting.'\n"
+        "ASL: 'First anniversary dinner, he make t-u-n-a n-o-o-d-l-e casserole, not-know she hate.'\n\n"
+
+        "**Example 76:**\n"
+        "English: 'Don’t get too excited!'\n"
+        "ASL: 'Too excited, don't!'\n\n"
+
+        "**Example 77:**\n"
+        "English: 'Shape up or ship out!'\n"
+        "ASL: 'Improve or leave!'\n\n"
+
+        "**Example 78:**\n"
+        "English: 'Kate was surprised when she saw that big dog.'\n"
+        "ASL: 'K-a-t-e see big dog, surprise!'\n\n"
+
+        "**Example 79:**\n"
+        "English: 'His voice was pitchy and weak, partially because he was so nervous.'\n"
+        "ASL: 'His voice off, weak, why? Nervous.'\n\n"
+
+        "**Example 80:**\n"
+        "English: 'You don’t listen to me.'\n"
+        "ASL: 'You not listen me.'\n\n"
+
+        "**Example 81:**\n"
+        "English: 'I am here for you.'\n"
+        "ASL: 'I here support you.'\n\n"
+
+        "**Example 82:**\n"
+        "English: 'This is the big break I've been waiting for.'\n"
+        "ASL: 'This big opportunity, I wait for.'\n\n"
+
+        "**Example 83:**\n"
+        "English: 'It is the morning.'\n"
+        "ASL: 'Now morning.'\n\n"
+
+        "**Example 84:**\n"
+        "English: 'I spread the map on the table.'\n"
+        "ASL: 'Map, I spread table.'\n\n"
+
+        "**Example 85:**\n"
+        "English: 'Tom's car is easily recognizable since there is a dent in the front bumper.'\n"
+        "ASL: 'T-o-m car easy recognize, why? Front bumper dent.'\n\n"
+
+        "**Example 86:**\n"
+        "English: 'One day, maybe, she'd be interested, but not right now.'\n"
+        "ASL: 'Maybe future, she interested, but not now.'\n\n"
+
+        "**Example 87:**\n"
+        "English: 'He wanted her to slow down a little bit as she sang.'\n"
+        "ASL: 'She sing, he want her slow down little.'\n\n"
+
+        "**Example 88:**\n"
+        "English: 'Thomas added his own name to the list of people who wanted to take part in the dance.'\n"
+        "ASL: 'T-h-o-m-a-s add his name list, people want join dance.'\n\n"
+
+        "**Example 89:**\n"
+        "English: 'I can do what you said.'\n"
+        "ASL: 'You say what, I can do.'\n\n"
+
+        "**Example 90:**\n"
+        "English: 'We still have a couple of big decisions to make.'\n"
+        "ASL: 'Big decisions, we still need make.'\n\n"
+
+        "**Example 91:**\n"
+        "English: 'She desperately wanted to meet an alien before she died.'\n"
+        "ASL: 'She really want meet alien before die.'\n\n"
+
+        "**Example 92:**\n"
+        "English: 'She found little pellets of iron in her garden bed.'\n"
+        "ASL: 'Her garden bed, she find small iron pieces.'\n\n"
+
+        "**Example 93:**\n"
+        "English: 'I call upon the scientific community in our country to turn their great talents now to the cause of mankind and world peace.'\n"
+        "ASL: 'I ask science community our country, now use skill help people, world peace.'\n\n"
+
+        "**Example 94:**\n"
+        "English: 'Can we stop pretending to like kale?'\n"
+        "ASL: 'We stop fake-like k-a-l-e?'\n\n"
+
+        "**Example 95:**\n"
+        "English: 'Where is the President right now?'\n"
+        "ASL: 'President now where?'\n\n"
+
+        "**Example 96:**\n"
+        "English: 'I need a dollar for the vending machine.'\n"
+        "ASL: 'Vending machine, I need 1-dollar.'\n\n"
+
+        "**Example 97:**\n"
+        "English: 'Which is deeper, a lake or an ocean?'\n"
+        "ASL: 'Lake, ocean, which deep more?'\n\n"
+
+        "**Example 98:**\n"
+        "English: 'He dreamed of leaving his law firm to open a portable dog wash.'\n"
+        "ASL: 'He dream leave law firm, open portable dog wash.'\n\n"
+
+        "**Example 99:**\n"
+        "English: 'David subscribes to the stuffing strategy over nicely folding clothes.'\n"
+        "ASL: 'D-a-v-i-d prefer stuff clothes, not fold nice.'\n\n"
+
+        "**Example 100:**\n"
+        "English: 'Jeanne wished she had chosen the red button.'\n"
+        "ASL: 'J-e-a-n-n-e wish she pick red button.'\n\n"

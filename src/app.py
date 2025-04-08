@@ -23,28 +23,31 @@ lock = threading.Lock()  # Ensures thread safety
 # Global variables for gesture recognition and animation
 frame_buffer = []
 gesture_sentence = ""
-word_count = 0
 is_recording = False
 is_detecting = False
 start_time = time.time()
-frame = None
+frame = []
 
 # Animation variables
-current_sentence = "Hello my name M A R C"
+current_sentence = "No Response yet"
 default_pose, default_hand_left, default_hand_right = load_default_pose()
 
 def gen_frames():
-    global frame, frame_buffer, gesture_sentence, word_count, is_recording, is_detecting, start_time
+    global frame, frame_buffer, gesture_sentence, is_recording, is_detecting, start_time   
+    offset = 0
     while True:
+        print()
         ret, frame = cap.read()
         if not ret:
             break
-
+        
+        offset+=1
+        
         with lock:
-            result = asl_recognition.test.recognize_sign(frame, frame_buffer, gesture_sentence, word_count, is_recording, is_detecting, start_time)
+            result = asl_recognition.test.recognize_sign(frame, frame_buffer, gesture_sentence, is_recording, is_detecting, start_time, offset)           
             gesture_sentence = result['gesture_sentence']
-            word_count = result['word_count']
             frame = result['frame']
+
 
         _, buffer = cv2.imencode('.jpg', frame)
         frame_bytes = buffer.tobytes()
@@ -98,7 +101,6 @@ def chat_from_gesture():
     asl_response = chatbot.chatbot.generate_asl_response(english_response)
 
 
-
     # Update the sentence for animation
     with lock:
         current_sentence = asl_response
@@ -120,11 +122,11 @@ def get_state_info():
     with lock:
         if frame is None:
             return jsonify({'error': 'No frame available'})
-        result = asl_recognition.test.recognize_sign(frame, frame_buffer, gesture_sentence, word_count, is_recording, is_detecting, start_time)
+        result = asl_recognition.test.recognize_sign(frame, frame_buffer, gesture_sentence, is_recording, is_detecting, start_time)
         return jsonify({
             'state_text': result['state_text'],
             'remaining_time': result['remaining_time'],
-            'word_count_text': result['word_count_text']
+            
         })
 
 @app.route('/toggle_detection', methods=['POST'])
@@ -149,7 +151,6 @@ def get_frame_data():
             'frame': "Available" if frame is not None else "No frame",
             'gesture_sentence': gesture_sentence,
             'state_text': "Capturing" if is_detecting else "Idle",
-            'word_count_text': f"Detected Words: {word_count}"
         })
 
 def release_camera():
