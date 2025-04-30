@@ -17,7 +17,8 @@ def preload_frames(word):
         for letter in letters:
             found = False
             for category in CATEGORIES:
-                folder_path = os.path.join(MODIFIED_TABLE, category, letter)
+                # Use letter.lower() for the folder lookup
+                folder_path = os.path.join(MODIFIED_TABLE, category, letter.lower())
                 if os.path.exists(folder_path):
                     files = sorted(glob(os.path.join(folder_path, "*.json")))
                     if files:
@@ -30,26 +31,28 @@ def preload_frames(word):
                 print(f"[Error] Letter '{letter}' not found.")
         return all_frames
 
-    # 2. Try to load as a regular word
+    # 2. Try to load as a regular word; convert to lower-case for folder lookup
+    word_lower = word.lower()  # Folder names are all lower-case.
     for category in CATEGORIES:
-        folder_path = os.path.join(MODIFIED_TABLE, category, word)
+        folder_path = os.path.join(MODIFIED_TABLE, category, word_lower)
         if os.path.exists(folder_path):
             files = sorted(glob(os.path.join(folder_path, "*.json")))
             if files:
                 frames = [load_keypoints_from_json(f) for f in files]
-                print(f"[Load] Loaded '{word}' from {category}/")
+                print(f"[Load] Loaded '{word_lower}' from {category}/")
                 return frames
             else:
                 print(f"[Error] No frames in '{folder_path}'.")
                 return []
 
-    # 3. Fallback: fingerspell each letter of the word
-    print(f"[Fallback] Word '{word}' not found. Falling back to fingerspelling.")
+    # 3. Fallback: Fingerspell each letter of the word.
+    word_upper = word.upper()
+    print(f"[Fallback] Word '{word_upper}' not found. Falling back to fingerspelling.")
     all_frames = []
-    for letter in word.upper():
+    for letter in word_upper:
         found = False
         for category in CATEGORIES:
-            folder_path = os.path.join(MODIFIED_TABLE, category, letter)
+            folder_path = os.path.join(MODIFIED_TABLE, category, letter.lower())
             if os.path.exists(folder_path):
                 files = sorted(glob(os.path.join(folder_path, "*.json")))
                 if files:
@@ -63,13 +66,24 @@ def preload_frames(word):
     return all_frames
 
 
-def animate_word(word):
+def animate_word(word, scale=2.0):
     frames = preload_frames(word)
     if not frames:
         return
     for pose, hand_left, hand_right in frames:
         frame = 255 * np.ones((FRAME_HEIGHT, FRAME_WIDTH, 3), dtype=np.uint8)
-        draw_keypoints(frame, pose, hand_left, hand_right)
+
+        valid_points = [point for point in pose if point is not None]
+        if valid_points:
+            pose_center_x = sum(p[0] for p in valid_points) / len(valid_points)
+            pose_center_y = sum(p[1] for p in valid_points) / len(valid_points)
+        else:
+            pose_center_x, pose_center_y = 0, 0
+
+        frame_center = (FRAME_WIDTH / 2, FRAME_HEIGHT / 2)
+
+        offset = (frame_center[0] - pose_center_x, frame_center[1] - pose_center_y)
+        draw_keypoints(frame, pose, hand_left, hand_right, offset=offset, scale=scale)
         # cv2.imshow("Sign Language Animator", frame)
         # if cv2.waitKey(ANIMATION_SPEED) & 0xFF == ord('q'):
             # return

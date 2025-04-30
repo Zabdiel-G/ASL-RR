@@ -10,36 +10,105 @@
   <body>
     <div class="page-wrapper">
       <div class="titles">
-        <div class="title-container">
           <h1>ASL Recognition and Response</h1>
-        </div>
         <img class="asl-logo" src="{{ url_for('static', filename='css/logo.png') }}" alt="ASL logo">
         <hr>
         <div class="boxes">
-          <h2 class="camera-title">Camera for ASL Recognition</h2><h2 class="response-title">ASL/Text Response</h2>
+          <!-- <h2 class="camera-title">Camera for ASL Recognition</h2><h2 class="response-title">ASL/Text Response</h2> -->
         </div>
       </div>
 
-      <div class="container">
-        <div class="left-panel">
-          <img id="videoFeed" src="{{ url_for('video_feed') }}" alt="Video Feed">
-          <div class="button-container">
-            <button type="button" id="toggleButton">Start/Stop Detection</button>
-            <button type="button" id="resetButton">Reset Gesture</button> 
+      <div class="grid-container">
+        <!-- Top Row -->
+        <div class="row top-row">
+          <div class="column" id="videoPanel">
+            <!-- <h2>Camera Feed</h2> -->
+            <video id="video" autoplay playsinline width="640" height="480"></video>
+            <canvas id="canvas" style="display:none;"></canvas>
+
+<script>
+  const video = document.getElementById('video');
+  const canvas = document.getElementById('canvas');
+
+  // Initialize camera
+  navigator.mediaDevices.getUserMedia({ video: true })
+    .then(stream => {
+      console.log('[Client] Camera stream obtained');
+      video.srcObject = stream;
+    })
+    .catch(err => {
+      console.error('[Client] getUserMedia error:', err);
+      alert('Camera error: ' + err.message);
+    });
+
+  // Frame capture every 33ms
+  async function sendFrame() {
+    if (!video.videoWidth || !video.videoHeight) return;
+
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+    canvas.toBlob(async blob => {
+      try {
+        const res = await fetch('/frame', {
+          method: 'POST',
+          body: blob
+        });
+        if (!res.ok) {
+          console.warn('[Client] Server responded with status:', res.status);
+        }
+      } catch (err) {
+        console.error('[Client] Failed to send frame:', err);
+      }
+    }, 'image/jpeg', 0.8);
+  }
+
+  setInterval(sendFrame, 66);
+</script>
           </div>
-          <button type="button" id="chatButton" class="respond-button">Respond</button>
-          <div id="status">
-            <span id="stateText">Idle</span><br>
-            <div id="gestureSentenceText">No gestures detected</div>
+
+          <!-- Controls Panel  -->
+          <div class="column" id="controlsPanel">
+            <div class="button-container">
+              <button type="button" id="toggleButton">Toggle Detection</button>
+              <button type="button" id="resetButton">Clear</button> 
+            </div>
+
+
+            <div id="status">
+              <span id="stateText">Idle</span><br>
+              <div id="gestureSentenceText">...</div>
+              <button type="button" id="chatButton" class="respond-button">Respond</button>
+            </div>
+
+            <div id="manualInput">
+              <input type="text" id="englishInput" placeholder="Type an English sentence here" />
+              <button type="button" id="translateButton">Translate to ASL Gloss</button>
+            </div>
           </div>
+          <!-- Controls Panel End  -->
+
+          
+
+          
         </div>
 
-        <div class="right-panel">
-          <h2>Animation Feed</h2>
-          <img id="animationFeed" src="{{ url_for('animation_feed') }}" alt="Animation Feed">
-          <div id="chatContainer">
-            <div id="chatOutput">No response yet.</div>
+        <!-- Bottom Row -->
+        <div class="row bottom-row">
+          <div class="column" id="animationPanel">
+            <!-- <h2>Animation Feed</h2> -->
+            <img id="animationFeed" src="{{ url_for('animation_feed') }}" alt="Animation Feed">
           </div>
+          
+          <!-- Output Panel  -->
+          <div class="column" id="outputPanel">
+            <div id="chatOutput" class="chat-scroll"></div>
+          </div>
+          
+          <!-- Output Panel End  -->
+
         </div>
       </div>
 

@@ -8,7 +8,7 @@ MODIFIED_TABLE = os.path.abspath(os.path.join(BASE_DIR, "..", "..", "Data", "mod
 print(f"[Debug] MODIFIED_TABLE Path: {MODIFIED_TABLE}")
 
 # Words are split into three types to help with 
-CATEGORIES = ['multi_word', 'single_word', 'alphabet']
+CATEGORIES = ['multi_word', 'single_word', 'alphabet_word']
 
 #This is for how fast the pose will sign.
 ANIMATION_SPEED = 10

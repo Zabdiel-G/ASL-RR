@@ -13,34 +13,44 @@ html, body {
   flex-direction: column;
 }
 
-.titles {
+/* .titles {
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
   position: relative;
-}
+} */
+
+/* .asl-logo {
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  width: 10vw;   
+  max-width: 100px;         
+  height: auto;             
+} */
 
 .asl-logo {
-  position: absolute;
-  top: 10px;
-  left: 10px;
+  background-color: rgb(0, 0, 0);
   height: 100px;
   width: 100px;
+  float: right;
 }
 
 .titles h1 {
   text-align: left;
-  font-family: 'Courier New', Courier, monospace;
+  font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
   color: white;
-  width: 300px;
+  width: 500px;
   display: inline-block;
   margin-top: 5px;
+  margin-left: 50px; /* or however much you want */
+
 }
 
 .titles hr {
-  width: 30%;
-  margin-left: 0;
+  width: 500px;
+  margin-left: 50px;
   margin-top: 0;
 }
 
@@ -66,11 +76,12 @@ html, body {
 .boxes h2 {
   display: inline-block;
   margin: 0;
-  margin-top: 100px;
-  height: 30px;
-  font-family: sans-serif;
+  margin-top: 0px;
+  height: 20px;
+  font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
 }
 
+/* edit start */
 .container {
   display: flex;
   justify-content: center;
@@ -84,17 +95,37 @@ html, body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  border: 2px solid #00ff00;
+  border: 2px solid lightgray;
   padding: 10px;
-  box-sizing: content-box; /* don’t let padding affect width */
+  box-sizing: border-box; /* don’t let padding affect width */
+}
+/* edit stop  */
+
+/* Adding English Input  */
+#manualInput {
+  margin-top: 10px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: flex-start;
+  width: 100%;
 }
 
-#videoFeed, #animationFeed {
-  width: 480px;
-  height: 640px;
-  object-fit: cover;
-  margin-bottom: 10px;
+#englishInput {
+  flex: 1;
+  padding: 8px;
+  font-size: 1rem;
 }
+
+#translateButton {
+  padding: 8px 12px;
+  font-size: 1rem;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+/* English Input Things End  */
 
 #animationWindow {
   width: 100%;
@@ -110,18 +141,6 @@ html, body {
   margin-bottom: 20px;
 }
 
-#chatOutput {
-  overflow-y: auto;
-  white-space: pre-wrap;
-  font-size: 16px;
-  border: 1px solid #ccc;
-  min-height: 150px;
-  max-height: 175px;
-  width: 100%;
-  max-width: 480px;
-  margin-bottom: 10px;
-}
-
 .button-container {
   display: flex;
   flex-wrap: wrap;
@@ -133,6 +152,7 @@ html, body {
 button {
   padding: 8px 12px;
   font-size: 1rem;
+  font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
   cursor: pointer;
   flex: 1;
   min-width: 140px;
@@ -172,7 +192,7 @@ button {
 
 #gestureSentenceText {
   width: 100%;
-  height: 100px;
+  height: 250px;
   border: 1px solid #ccc;
   overflow-y: auto;
   font-size: 24px;
@@ -190,7 +210,7 @@ button {
   .left-panel, .right-panel {
     width: 100%;
     max-width: 100%;
-    border: 1px solid #00ff00;
+    border: 1px solid #d3d3d3;
     box-sizing: border-box;
   }
 
@@ -223,4 +243,170 @@ footer {
 
 .footerlink:hover {
   color: red;
+}
+
+.grid-container {
+  /* display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 10px 40px 0px 40px; 
+  width: 100%;
+  box-sizing: border-box; */
+  display: flex;
+  flex-direction: column;
+  padding: 10px 40px 10px 40px;
+  gap: 20px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.row.top-row {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.row.bottom-row {
+  display: flex;
+  gap: 20px;
+  align-items: flex-end;
+  width: 100%;
+  box-sizing: border-box;
+}
+.column {
+  /* flex: 1;
+  min-width: 300px;
+  border: 2px solid #00ff00;
+  padding: 10px;
+  box-sizing: border-box; */
+
+  /* flex: 1; */
+  flex: 0 0 auto; /* prevent vertical stretching */
+  min-width: 300px;
+  box-sizing: border-box;
+  border: 2px solid lightgray;
+  padding: 10px;
+}
+
+/* Ensure video and animation feed scale to fit their panels with 10px padding */
+#video, #animationFeed {
+  /* width: 100%;
+  height: auto;
+  max-width: 100%;
+  display: block;
+  box-sizing: border-box;
+  border: none;
+  padding: 0;
+  margin: 0; */
+  height: 100%;
+  width: auto;
+  max-height: 100%;
+  max-width: 100%;
+  display: block;
+  box-sizing: border-box;
+  object-fit: contain; /* OPTIONAL, helps avoid distortion */
+}
+
+/* Match height for both panels based on content (video and animation) */
+#videoPanel, #animationPanel {
+
+  height: 480px; /* or whatever your final height is */
+  width: 640px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 10px;
+  box-sizing: border-box;
+  flex: 0 0 auto; /* prevent stretch */
+}
+
+/* #outputPanel {
+  display: flex;
+  flex-direction: column;
+  height: 480px;
+  padding: 10px;
+  box-sizing: border-box;
+} */
+
+#outputPanel {
+  flex: 1;
+  height: 480px;
+  padding: 10px;
+  box-sizing: border-box;
+}
+
+#controlsPanel {
+  padding: 10px;
+  height: 480px; /* 240 */
+  flex: 1; /* stretch to fill remaining row width */
+}
+
+h1, h2, h3 {
+  color: white;
+}
+
+#aslGlossText {
+  color: white;
+  background-color: transparent; /* optional, removes green tint */
+  border: 1px solid white;
+}
+
+#englishResponseText {
+  color: white;
+  background-color: transparent; /* optional - to remove gray tint */
+  border: 1px solid white;
+}
+
+/* #outputPanel h3 {
+  color: white;
+} */
+
+#chatOutput.chat-scroll {
+  flex: 1; /* This is the key */
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  background-color: #111;
+  color: white;
+  padding: 10px;
+  box-sizing: border-box;
+  border: 1px solid #ccc;
+  font-size: 0.95rem;
+  line-height: 1.4;
+  display: flex;
+  flex-direction: column;
+}
+
+.chat-message {
+  margin-bottom: 8px;
+  white-space: pre-wrap;
+  line-height: 1.4;
+}
+
+.chat-message.user {
+  color: #4CAF50; /* green for user */
+}
+
+.chat-message.bot {
+  color: #00BFFF; /* light blue for bot */
+}
+
+.chat-message strong {
+  display: block;
+  margin-bottom: 4px;
+}
+
+.chat-message em {
+  display: block;
+  margin-left: 10px;
+  color: #ccc;
+}
+
+.column, .box, .chat-scroll, #status, #manualInput, #videoPanel, #controlsPanel, #animationPanel, #outputPanel {
+  border-radius: 12px; /* Or match your button's radius */
+  overflow: hidden; /* Optional: keeps content from overflowing curved edges */
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Optional: soft shadow like buttons */
 }
